@@ -1,0 +1,129 @@
+:blc_ms_version: 0.11.0-SNAPSHOT
+:toc:
+:icons: font
+:source-highlighter: prettify
+:project_id: ms-tutorials
+:sectnums:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= Microservice Tutorials
+
+== Project Structure
+
+.Project Modules Overview
+|===
+|Module |Description
+
+|`ms-tutorial-base`
+| Intended to be the initial project structure on which the other tutorials are based
+
+A basic project that shows running Broadleaf's unified microservices admin alongside the `Catalog`
+microservice (in addition to some supporting services)
+
+|`ms-tutorial-extension-complete`
+| A completed tutorial that showcases typical extensions and customizations on top of the base project
+
+|===
+
+== What Do I Need?
+In order to get these tutorials running locally, you will want to obtain and install
+the following:
+
+=== Credentials
+Access to Broadleaf's Docker Registry and Maven Nexus is needed in order to pull down the
+appropriate resources.
+
+Once you have obtained these credentials, you will need to configure them for the dependencies
+below.
+
+[NOTE]
+====
+Contact `info@broadleafcommerce.com` for information on how to receive these credentials
+====
+
+=== Java
+You will need https://www.oracle.com/java/technologies/javase-downloads.html[JDK 1.8] or later
+installed on your machine.
+
+=== Docker
+You will need to have https://docs.docker.com/install/[Docker Engine & Docker Compose] installed
+locally
+
+[TIP]
+====
+Docker Desktop for both Mac and Windows already includes compose along with other
+docker apps.
+====
+
+Once you have docker installed, you will want to authenticate with Broadleaf's docker registry.
+
+Type the following into your CLI:
+
+[source,shell script]
+----
+docker login repository.broadleafcommerce.com:5001
+----
+
+When prompted, type in the username and password you received above.
+
+=== Maven
+You'll need to have Maven installed locally as well.
+https://maven.apache.org/download.cgi[Maven 3.5 or later] is recommended.
+
+Once you have maven installed, add the following to your `~/.m2/settings.xml` making sure to
+replace the credentials with the ones you received above:
+
+[source,xml]
+----
+<server>
+    <id>broadleaf-microservices</id>
+    <username>username_here</username>
+    <password>password_here</password>
+</server>
+----
+
+[TIP]
+====
+More info about authenticating with private repositories can be found
+https://maven.apache.org/settings.html#Servers[here]
+====
+
+== Running the Project
+
+Now that all of the pre-requisites are installed, let's run the project!
+
+1. First, let's build the project using Maven
++
+[source,shell script]
+----
+mvn clean install
+----
++
+2. Before you start up all the APIs, you'll need to first start up a few supporting services
+that are required for this example. These services are provided via docker images and can be run
+and started from the command line by navigating to the root of this project and running:
++
+[source,shell script]
+----
+docker-compose up -d
+----
++
+3. Next, you will want to start up the core backend commerce APIs by running the following command:
++
+[source,shell script]
+----
+mvn spring-boot:run
+----
++
+4. That's it! Once you've verified that the supporting services and backend APIs are running, you can visit
+the administration console from a browser:
++
+- Admin Console: https://localhost:8446
+* Username: `master@test.com`
+* Password: `Pass1word!`

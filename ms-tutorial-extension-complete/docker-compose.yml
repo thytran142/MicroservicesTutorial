@@ -1,0 +1,113 @@
+version: '3'
+services:
+  admingateway:
+    depends_on:
+      - localkafka
+    env_file:
+      - common-environment.env
+    environment:
+      BROADLEAF_GATEWAY_FILTERS_ADMINNAVIGATION: '${BROADLEAF_GATEWAY_FILTERS_ADMINNAVIGATION}'
+      BROADLEAF_GATEWAY_FILTERS_ASSET: '${BROADLEAF_GATEWAY_FILTERS_ASSET}'
+      BROADLEAF_GATEWAY_FILTERS_CATALOG: '${BROADLEAF_GATEWAY_FILTERS_CATALOG}'
+      BROADLEAF_GATEWAY_FILTERS_METADATA: '${BROADLEAF_GATEWAY_FILTERS_METADATA}'
+      BROADLEAF_GATEWAY_FILTERS_TENANT: '${BROADLEAF_GATEWAY_FILTERS_TENANT}'
+      BROADLEAF_GATEWAY_PROXYURLS_ADMINNAVIGATION: '${BROADLEAF_GATEWAY_PROXYURLS_ADMINNAVIGATION}'
+      BROADLEAF_GATEWAY_PROXYURLS_ADMINUSER: '${BROADLEAF_GATEWAY_PROXYURLS_ADMINUSER}'
+      BROADLEAF_GATEWAY_PROXYURLS_ADMINWEB: '${BROADLEAF_GATEWAY_PROXYURLS_ADMINWEB}'
+      BROADLEAF_GATEWAY_PROXYURLS_ASSET: '${BROADLEAF_GATEWAY_PROXYURLS_ASSET}'
+      BROADLEAF_GATEWAY_PROXYURLS_AUTH: '${BROADLEAF_GATEWAY_PROXYURLS_AUTH}'
+      BROADLEAF_GATEWAY_PROXYURLS_AUTHAPI: '${BROADLEAF_GATEWAY_PROXYURLS_AUTHAPI}'
+      BROADLEAF_GATEWAY_PROXYURLS_CATALOG: '${BROADLEAF_GATEWAY_PROXYURLS_CATALOG}'
+      BROADLEAF_GATEWAY_PROXYURLS_CONFIG: '${BROADLEAF_GATEWAY_PROXYURLS_CONFIG}'
+      BROADLEAF_GATEWAY_PROXYURLS_METADATA: '${BROADLEAF_GATEWAY_PROXYURLS_METADATA}'
+      BROADLEAF_GATEWAY_PROXYURLS_TENANT: '${BROADLEAF_GATEWAY_PROXYURLS_TENANT}'
+      DEBUG_PORT: 8001
+    image: repository.broadleafcommerce.com:5001/broadleaf/admingateway:latest-0.11-snapshot
+    networks:
+      - kafkanet
+      - backend
+    ports:
+      - '8446:8446'
+      - '8001:8001'
+    tty: true
+  adminweb:
+    depends_on:
+      - admingateway
+    environment:
+      NODE_ENV: development
+      REACT_APP_ENABLE_DEV_SETTINGS: 'true'
+    image: repository.broadleafcommerce.com:5001/broadleaf/adminweb:latest-0.11-snapshot
+    networks:
+      - backend
+    ports:
+      - '3000:3000'
+    tty: true
+  auth:
+    depends_on:
+      - localkafka
+      - postgres
+    env_file:
+      - common-environment.env
+    environment:
+      BROADLEAF_AUTH_REDIRECT_DEFAULTHOMEPAGEREDIRECTURL: 'https://localhost:8446'
+      BROADLEAF_AUTH_SECURITY_LOGINPATHORURL: 'https://localhost:8443/auth/login'
+      BROADLEAF_AUTH_SECURITY_OAUTH2_AUTOAPPROVEDCLIENTREGISTEREDREDIRECTS: 'https://localhost:8446/silent-callback.html,https://localhost:8446/callback'
+      DEBUG_PORT: 8000
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/broadleaf?currentSchema=auth'
+    image: repository.broadleafcommerce.com:5001/broadleaf-demo/authenticationservice-kafka-configserver:microservices-starter
+    networks:
+      - kafkanet
+      - postgresnet
+      - backend
+    ports:
+      - '8443:8443'
+      - '8000:8000'
+    tmpfs: /tmp
+    tty: true
+  localkafka:
+    depends_on:
+      - zk
+    environment:
+      JMX_PORT: 7777
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localkafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_BROKER_ID: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Djava.net.preferIPv4Stack=true'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zk:2181'
+    image: confluentinc/cp-kafka:latest
+    networks:
+      - kafkanet
+    ports:
+      - '9092:9092'
+      - '7777:7777'
+    tty: true
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+  postgres:
+    environment:
+      POSTGRES_DB: broadleaf
+      POSTGRES_PASSWORD: demo
+      POSTGRES_USER: broadleaf
+    image: postgres:11.2
+    networks:
+      - postgresnet
+    ports:
+      - '5432:5432'
+    restart: always
+    tty: true
+  zk:
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    image: confluentinc/cp-zookeeper:latest
+    networks:
+      - kafkanet
+    ports:
+      - '2181:2181'
+    tty: true
+networks:
+  backend:
+  kafkanet:
+  postgresnet:

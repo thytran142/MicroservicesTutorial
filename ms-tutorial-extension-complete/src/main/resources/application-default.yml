@@ -1,0 +1,172 @@
+broadleaf:
+  database:
+    provider: jpa
+  adminnavigation:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=adminnavigation'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+      data:
+        - 'classpath:/admin-navigation-data-jpa.sql'
+    liquibase:
+      change-log: 'classpath:/db/changelog/admin-navigation.db.changelog-master.yaml'
+      liquibase-schema: public
+  adminuser:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=adminuser'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+      data:
+        - 'classpath:/admin-user-sample-data.sql'
+    liquibase:
+      change-log: 'classpath:/db/changelog/admin-user.db.changelog-master.yaml'
+      liquibase-schema: public
+  asset:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=asset'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+    provider:
+      contentUrlPrefix: 'https://localhost:8447/content'
+    liquibase:
+      change-log: 'classpath:/db/changelog/asset.db.changelog-master.yaml'
+      liquibase-schema: public
+  catalog:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=catalog'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+    liquibase:
+      change-log: 'classpath:/db/changelog/catalog.db.changelog-master.yaml'
+      liquibase-schema: public
+  common:
+    data:
+      route:
+        enabled: true
+    policy:
+      validation:
+        enforce: true
+  image:
+    availableEffects: 'crop, resize, scale, thumbnail, unsharp'
+  metadata:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=metadata'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+    liquibase:
+      change-log: 'classpath:/db/changelog/metadata.db.changelog-master.yaml'
+      liquibase-schema: public
+  persistence:
+    retry:
+      developerMode: true
+  resource:
+    security:
+      oauth2:
+        defaultAllowAllAnonymous: false
+  tenant:
+    jpa:
+      hibernate:
+        ddl-auto: create
+    datasource:
+      initialization-mode: always
+      platform: postgres
+      url: 'jdbc:postgresql://localhost:5432/broadleaf?currentSchema=tenant'
+      username: broadleaf
+      password: demo
+      hikari:
+        maximumPoolSize: 2
+      data:
+        - 'classpath:/tutorial-tenant-data-jpa.sql'
+    liquibase:
+      change-log: 'classpath:/db/changelog/tenant.db.changelog-master.yaml'
+      liquibase-schema: public
+    site:
+      global:
+        allowed-locales:
+          - en_US
+        default-locale: en_US
+    urlresolver:
+      admin:
+        port: 8446
+server:
+  port: 8447
+  servlet:
+    context-path: /
+  ssl:
+    key-password: keypass
+    key-store: 'classpath:local.keystore'
+    key-store-password: storepass
+spring:
+  integration:
+    jdbc:
+      initialize-schema: always
+  cloud:
+    bus:
+      enabled: false
+  datasource:
+    initialization-mode: never
+    platform: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+    database: postgresql
+  messages:
+    useCodeAsDefaultMessage: true
+  security:
+    oauth2:
+      client:
+        provider:
+          catalog:
+            token-uri: 'https://localhost:8443/auth/oauth/token'
+        registration:
+          catalog:
+            authorization-grant-type: client_credentials
+            client-id: catalog
+            client-secret: catalog_secret
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 20MB
+      resolve-lazily: true
+  thymeleaf:
+    cache: false

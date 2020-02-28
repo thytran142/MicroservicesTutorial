@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <!-- IMPORTANT -->
+        <!-- When updating Spring Boot versions ensure that the version here matches the property for
+            spring.boot.version -->
+        <!-- IMPORTANT - READ THE NOTE ^^^ -->
+        <version>2.2.1.RELEASE</version> <!-- IMPORTANT - READ THE NOTE ^^^ -->
+        <!-- IMPORTANT -->
+        <relativePath />
+    </parent>
+
+    <groupId>com.broadleafcommerce.microservices</groupId>
+    <artifactId>ms-tutorial-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Broadleaf Microservice Tutorials Parent</name>
+    <description>Microservice Tutorials Parent</description>
+    <packaging>pom</packaging>
+
+    <repositories>
+        <repository>
+            <id>broadleaf-microservices</id>
+            <url>https://repository.broadleafcommerce.com/repository/microservices/</url>
+        </repository>
+    </repositories>
+
+    <scm>
+        <connection>scm:git:git@github.com:BroadleafCommerce/MicroservicesTutorial.git</connection>
+        <developerConnection>scm:git:git@github.com:BroadleafCommerce/MicroservicesTutorial.git</developerConnection>
+        <url>https://github.com/BroadleafCommerce/MicroservicesTutorial</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <blc.microservices.dependencies>1.0.2-SNAPSHOT</blc.microservices.dependencies>
+        <blc.jpa.dependencies>1.0.2-SNAPSHOT</blc.jpa.dependencies>
+        <blc.config.server.metadata>0.11.0-SNAPSHOT</blc.config.server.metadata>
+
+        <blc.admin.navigation.services>0.11.0-SNAPSHOT</blc.admin.navigation.services>
+        <blc.admin.navigation.metadata>0.11.0-SNAPSHOT</blc.admin.navigation.metadata>
+        <blc.admin.user.services>0.11.0-SNAPSHOT</blc.admin.user.services>
+        <blc.admin.user.metadata>0.11.0-SNAPSHOT</blc.admin.user.metadata>
+        <blc.asset.services>0.11.0-SNAPSHOT</blc.asset.services>
+        <blc.asset.metadata>0.11.0-SNAPSHOT</blc.asset.metadata>
+        <blc.authentication.services>0.11.0-SNAPSHOT</blc.authentication.services>
+        <blc.authentication.metadata>0.11.0-SNAPSHOT</blc.authentication.metadata>
+        <blc.billing.services>0.11.0-SNAPSHOT</blc.billing.services>
+        <blc.billing.metadata>0.11.0-SNAPSHOT</blc.billing.metadata>
+        <blc.campaign.services>0.11.0-SNAPSHOT</blc.campaign.services>
+        <blc.campaign.metadata>0.11.0-SNAPSHOT</blc.campaign.metadata>
+        <blc.cart.services>0.11.0-SNAPSHOT</blc.cart.services>
+        <blc.cart.metadata>0.11.0-SNAPSHOT</blc.cart.metadata>
+        <blc.cartops.services>0.11.0-SNAPSHOT</blc.cartops.services>
+        <blc.cartops.metadata>0.11.0-SNAPSHOT</blc.cartops.metadata>
+        <blc.catalog.services>0.11.0-SNAPSHOT</blc.catalog.services>
+        <blc.catalog.metadata>0.11.0-SNAPSHOT</blc.catalog.metadata>
+        <blc.catalogbrowse.services>0.11.0-SNAPSHOT</blc.catalogbrowse.services>
+        <blc.catalogbrowse.metadata>0.11.0-SNAPSHOT</blc.catalogbrowse.metadata>
+        <blc.customer.services>0.11.0-SNAPSHOT</blc.customer.services>
+        <blc.customer.metadata>0.11.0-SNAPSHOT</blc.customer.metadata>
+        <blc.entitlement.services>0.11.0-SNAPSHOT</blc.entitlement.services>
+        <blc.entitlement.metadata>0.11.0-SNAPSHOT</blc.entitlement.metadata>
+        <blc.import.services>0.11.0-SNAPSHOT</blc.import.services>
+        <blc.import.metadata>0.11.0-SNAPSHOT</blc.import.metadata>
+        <blc.indexer.services>0.11.0-SNAPSHOT</blc.indexer.services>
+        <blc.indexer.metadata>0.11.0-SNAPSHOT</blc.indexer.metadata>
+        <blc.menu.services>0.11.0-SNAPSHOT</blc.menu.services>
+        <blc.menu.metadata>0.11.0-SNAPSHOT</blc.menu.metadata>
+        <blc.metadata.services>0.11.0-SNAPSHOT</blc.metadata.services>
+        <blc.offer.services>0.11.0-SNAPSHOT</blc.offer.services>
+        <blc.offer.metadata>0.11.0-SNAPSHOT</blc.offer.metadata>
+        <blc.payment.services>1.0.0-SNAPSHOT</blc.payment.services>
+        <blc.payment.metadata>1.0.0-SNAPSHOT</blc.payment.metadata>
+        <blc.personalization.services>0.11.0-SNAPSHOT</blc.personalization.services>
+        <blc.personalization.metadata>0.11.0-SNAPSHOT</blc.personalization.metadata>
+        <blc.pricing.services>0.11.0-SNAPSHOT</blc.pricing.services>
+        <blc.pricing.metadata>0.11.0-SNAPSHOT</blc.pricing.metadata>
+        <blc.sandbox.services>0.11.0-SNAPSHOT</blc.sandbox.services>
+        <blc.sandbox.metadata>0.11.0-SNAPSHOT</blc.sandbox.metadata>
+        <blc.scheduled.job.services>0.11.0-SNAPSHOT</blc.scheduled.job.services>
+        <blc.scheduled.job.metadata>0.11.0-SNAPSHOT</blc.scheduled.job.metadata>
+        <blc.search.services>0.11.0-SNAPSHOT</blc.search.services>
+        <blc.search.metadata>0.11.0-SNAPSHOT</blc.search.metadata>
+        <blc.tenant.services>0.11.0-SNAPSHOT</blc.tenant.services>
+        <blc.tenant.metadata>0.11.0-SNAPSHOT</blc.tenant.metadata>
+    </properties>
+
+    <modules>
+        <module>ms-tutorial-base</module>
+        <module>ms-tutorial-extension-complete</module>
+    </modules>
+
+</project>
