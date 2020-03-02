@@ -17,10 +17,21 @@ backend APIs and microservices framework provided with Broadleaf.
 
 They are a great way to experience some core fundamentals before diving into more complex scenarios.
 
+[NOTE]
+====
+The guides here assume you are building these customizations on a base project that has
+already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
+or `MicroservicesStarter` for details.
+====
+
 [TIP]
 ====
 We recommend following along with this guide in the order in which it is presented. Each section
-may build on and reference extensions created in a previous section
+may build on and reference extensions created in a previous section. 
+
+Once you're done,
+you can check your results against the code in this project:
+`MicroservicesTutorial/ms-tutorial-extension-complete`
 ====
 
 == Service Anatomy Overview
@@ -115,6 +126,13 @@ requirements. Also, mutator methods can be overridden for additional customizati
 Queries through existing Broadleaf repositories should return the more derived repository domain
 as appropriate. As well, creation of entity state should be accurate to the more derived type.
 
+[NOTE]
+====
+We're continually adding new features and capabilities to enhance the developer experience.
+We recommend checking back often to see any new features and tools that will be added to
+help provide a seamless customization experience.
+====
+
 === Extension Example
 We're going to create a simple `String` property on `JpaProduct` to demonstrate extending a base
 framework *repository* domain.
@@ -132,18 +150,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "TUTORIAL_PRODUCT")
+@Table(name = "TUTORIAL_PRODUCT") // <1>
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TutorialJpaProduct extends JpaProduct {
+public class TutorialJpaProduct extends JpaProduct { // <2>
 
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "MY_PROPERTY")
+    @Column(name = "MY_PROPERTY") // <3>
     private String myProperty;
 
     @Override
-    public ModelMapper fromMe() {
+    public ModelMapper fromMe() { // <4>
         ModelMapper mapper = super.fromMe();
         mapper.createTypeMap(TutorialJpaProduct.class, TutorialProduct.class)
                 .addMapping(TutorialJpaProduct::getContextId, TutorialProduct::setId);
@@ -151,7 +169,7 @@ public class TutorialJpaProduct extends JpaProduct {
     }
 
     @Override
-    public ModelMapper toMe() {
+    public ModelMapper toMe() { // <5>
         ModelMapper mapper = super.toMe();
         mapper.createTypeMap(TutorialProduct.class, TutorialJpaProduct.class)
                 .addMappings(mapping -> mapping.when(Conditions.isNotNull())
@@ -160,12 +178,20 @@ public class TutorialJpaProduct extends JpaProduct {
     }
 
     @Override
-    public Class<?> getBusinessDomainType() {
+    public Class<?> getBusinessDomainType() {  // <6>
         return TutorialProduct.class;
     }
 
 }
 ----
+<1> Specify an extended table name to hold your new properties
+<2> Extend `JPAProduct`
+<3> Specify a column for your new property
+<4> Define a `fromMe` method that helps the framework's mapping pipeline translate from repository
+to projection domains
+<5> Define a `toMe` method that helps the framework's mapping pipeline translate from projection to
+repository domains
+<6> define the "business domain" fully qualified classname (i.e. the `TutorialProject` projection class)
 
 Finally, you'll want to inform the system of your new entity. You can do this by specifying
 a `@JpaEntityScan` for your particular package. It may look something like this:
@@ -216,7 +242,7 @@ import com.broadleafcommerce.data.tracking.core.service.RsqlCrudEntityHelper;
 import lombok.extern.apachecommons.CommonsLog;
 
 @CommonsLog
-public class TutorialProductService extends DefaultProductService {
+public class TutorialProductService extends DefaultProductService {  // <1>
 
     public TutorialProductService(ProductRepository repository, RsqlCrudEntityHelper helper,
             VariantService variantService) {
@@ -224,12 +250,14 @@ public class TutorialProductService extends DefaultProductService {
     }
 
     @Override
-    public Object create(Object businessInstance, ContextInfo context) {
+    public Object create(Object businessInstance, ContextInfo context) { // <2>
         log.info("EXTENSION TUTORIAL - DEMONSTRATE EXECUTION OF CUSTOM BUSINESS LOGIC");
         return super.create(businessInstance, context);
     }
 }
 ----
+<1> Extend the framework's `DefaultProductService`
+<2> Override the `create()` method, add a custom logging message, and call `super()`
 
 [IMPORTANT]
 ====
@@ -289,21 +317,21 @@ import java.util.Map;
 
 import lombok.NonNull;
 
-public class TutorialProductExportRowConverter extends ProductExportRowConverter {
+public class TutorialProductExportRowConverter extends ProductExportRowConverter { // <1>
 
     public TutorialProductExportRowConverter(@NonNull ToStringConverter<Object> toStringConverter) {
         super(toStringConverter);
     }
 
     @Override
-    public LinkedHashSet<String> getHeaders() {
+    public LinkedHashSet<String> getHeaders() { // <2>
         LinkedHashSet<String> headers = super.getHeaders();
         headers.add(TutorialFields.MY_PROPERTY);
         return headers;
     }
 
     @Override
-    public Map<String, String> convert(Product source) {
+    public Map<String, String> convert(Product source) {  // <3>
         Map<String, String> result = super.convert(source);
         ConversionUtils.putIfNotNull(TutorialFields.MY_PROPERTY,
                 ((TutorialProduct) source).getMyProperty(), result);
@@ -316,6 +344,9 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
 
 }
 ----
+<1> Extend the framework's `ProductExportRowConverter`
+<2> Override the `getHeaders()` method to call `super()` and define your new property
+<3> Override the `convert()` method to call `super()` and define your new property
 
 [IMPORTANT]
 ====
@@ -393,7 +424,7 @@ import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
 public class TutorialMetadataConfig {
 
     @Component
-    class TutorialProductFields extends ProductFields {
+    class TutorialProductFields extends ProductFields {  // <1>
 
         public static final String MY_PROPERTY = "myProperty";
 
@@ -408,7 +439,7 @@ public class TutorialMetadataConfig {
     }
 
     @Component
-    class TutorialProductForms extends ProductForms {
+    class TutorialProductForms extends ProductForms {  // <2>
 
         public TutorialProductForms(ProductFields productFields,
                 ProductOptionFields productOptionFields, VariantFields variantFields,
@@ -430,6 +461,10 @@ public class TutorialMetadataConfig {
     }
 }
 ----
+<1> Create a new Spring Component to extend the framework's `ProductFields` component.
+Call `super()` and add you new custom field component.
+<2> Create a new Spring Component to extend the framework's `ProductForms` to override
+the `generalForm()` builder. Call `super()` and add your new field to the metadata.
 
 == Putting It All Together
 
