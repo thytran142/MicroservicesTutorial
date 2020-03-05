@@ -32,7 +32,7 @@ microservice (in addition to some supporting services)
 |===
 
 == What Do I Need?
-In order to get these tutorials running locally, you will want to obtain and install
+In order to get this reference project running locally, you will want to obtain and install
 the following:
 
 === Credentials
@@ -48,8 +48,10 @@ Contact `info@broadleafcommerce.com` for information on how to receive these cre
 ====
 
 === Java
-You will need https://www.oracle.com/java/technologies/javase-downloads.html[JDK 1.8] or later
-installed on your machine.
+You will need Java 8 or 11 installed on your machine.
+
+* https://openjdk.java.net/projects/jdk/11/[Open JDK]
+* https://www.oracle.com/java/technologies/javase-jdk11-downloads.html[Oracle JDK]
 
 === Docker
 You will need to have https://docs.docker.com/install/[Docker Engine & Docker Compose] installed
@@ -72,26 +74,51 @@ docker login repository.broadleafcommerce.com:5001
 
 When prompted, type in the username and password you received above.
 
+[IMPORTANT]
+====
+You'll also want to configure Docker settings to use appropriate resources.
+A good rule of thumb is to allow Docker to consume around 3/4 of your system resources
+as necessary.
+
+At a minimum, you will want to allocate at least 2 CPUs and 4 GB Memory
+(2 Memory/2 Swap).
+
+Ideally for a developer machine, you will want to allocate something like:
+6 CPUs, 8 GB Memory, 4 GB Swap.
+====
+
 === Maven
 You'll need to have Maven installed locally as well.
 https://maven.apache.org/download.cgi[Maven 3.5 or later] is recommended.
 
-Once you have maven installed, add the following to your `~/.m2/settings.xml` making sure to
+Once you have maven installed, another step you need to do before you can
+build the project is to configure the authentication. Maven requires it to be specified in a
+file called `settings.xml` that has to be in the `.m2` subdirectory in a user’s home directory.
+
+1. Create a folder called `.m2` in your home directory
+2. Create a file called `settings.xml` in the `.m2` folder
+3. Copy the following contents to your `~/.m2/settings.xml` making sure to
 replace the credentials with the ones you received above:
 
 [source,xml]
 ----
-<server>
-    <id>broadleaf-microservices</id>
-    <username>username_here</username>
-    <password>password_here</password>
-</server>
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd"
+    xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <servers>
+    <server>
+      <id>broadleaf-microservices</id>
+      <username>username_here</username>
+      <password>password_here</password>
+    </server>
+  </servers>
+</settings>
 ----
 
 [TIP]
 ====
 More info about authenticating with private repositories can be found
-https://maven.apache.org/settings.html#Servers[here]
+https://maven.apache.org/settings.html#Servers[here] and
+https://maven.apache.org/ref/3.6.3/maven-settings/settings.html[here]
 ====
 
 == Running the Project
