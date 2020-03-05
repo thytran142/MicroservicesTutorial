@@ -22,7 +22,7 @@ services:
       BROADLEAF_GATEWAY_PROXYURLS_METADATA: '${BROADLEAF_GATEWAY_PROXYURLS_METADATA}'
       BROADLEAF_GATEWAY_PROXYURLS_TENANT: '${BROADLEAF_GATEWAY_PROXYURLS_TENANT}'
       DEBUG_PORT: 8001
-    image: repository.broadleafcommerce.com:5001/broadleaf/admingateway:latest-0.11-snapshot
+    image: repository.broadleafcommerce.com:5001/broadleaf-evaluation/admingateway:microservices-starter
     networks:
       - kafkanet
       - backend
@@ -36,7 +36,7 @@ services:
     environment:
       NODE_ENV: development
       REACT_APP_ENABLE_DEV_SETTINGS: 'true'
-    image: repository.broadleafcommerce.com:5001/broadleaf/adminweb:latest-0.11-snapshot
+    image: repository.broadleafcommerce.com:5001/broadleaf-evaluation/adminweb:microservices-starter
     networks:
       - backend
     ports:
@@ -50,11 +50,12 @@ services:
       - common-environment.env
     environment:
       BROADLEAF_AUTH_REDIRECT_DEFAULTHOMEPAGEREDIRECTURL: 'https://localhost:8446'
-      BROADLEAF_AUTH_SECURITY_LOGINPATHORURL: 'https://localhost:8443/auth/login'
+      BROADLEAF_AUTH_SECURITY_LOGINPATHORURL: '/login'
       BROADLEAF_AUTH_SECURITY_OAUTH2_AUTOAPPROVEDCLIENTREGISTEREDREDIRECTS: 'https://localhost:8446/silent-callback.html,https://localhost:8446/callback'
+      BROADLEAF_AUTH_SECURITY_USEREDIRECTURIHOST: 'true'
       DEBUG_PORT: 8000
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/broadleaf?currentSchema=auth'
-    image: repository.broadleafcommerce.com:5001/broadleaf-demo/authenticationservice-kafka-configserver:microservices-starter
+    image: repository.broadleafcommerce.com:5001/broadleaf-evaluation/authenticationservice-kafka-configserver:microservices-starter
     networks:
       - kafkanet
       - postgresnet
