@@ -17,7 +17,6 @@ bin/
 .vagrant/
 .factorypath
 .sts4-cache
-*.keystore
 rebel.xml
 rebel-remote.xml
 *.rebel*
