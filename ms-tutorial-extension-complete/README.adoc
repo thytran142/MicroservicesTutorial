@@ -22,6 +22,10 @@ They are a great way to experience some core fundamentals before diving into mor
 The guides here assume you are building these customizations on a base project that has
 already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
 or `MicroservicesStarter` for details.
+
+Also be aware that this project is set up to only load the `Catalog` microservice
+alongside some additional supporting services. Not all backend commerce APIs
+are needed for the scope of this tutorial.
 ====
 
 [TIP]
