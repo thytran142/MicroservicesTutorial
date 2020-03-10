@@ -1160,6 +1160,10 @@ In this project, we've added a maven profile called `nosec` which
 passes in some particular properties to disable certain api security
 measures. This allows us to easily demonstrate
 some example flows using the Admin and cURL which will be shown below
+
+If you're starting from `ms-tutorial-base` you'll also
+want to add the following bean `AlwaysMutableContextStateBuilder` to your project,
+which is defined in the main Spring Boot Application class `TutorialNewEntityApplication`
 ====
 
 === Example Flows

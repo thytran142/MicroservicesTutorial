@@ -29,6 +29,10 @@ microservice (in addition to some supporting services)
 |`ms-tutorial-extension-complete`
 | A completed tutorial that showcases typical extensions and customizations on top of the base project
 
+|`ms-tutorial-new-entity-complete`
+| A completed tutorial that showcases the creation of new domain, repositories, services, and endpoints
+on top of Broadleaf's `Catalog` microservice
+
 |===
 
 == What Do I Need?
