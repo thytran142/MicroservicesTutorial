@@ -84,8 +84,7 @@ You'll also want to configure Docker settings to use appropriate resources.
 A good rule of thumb is to allow Docker to consume around 3/4 of your system resources
 as necessary.
 
-At a minimum, you will want to allocate at least 2 CPUs and 4 GB Memory
-(2 Memory/2 Swap).
+At a minimum, you will want to allocate at least 2 CPUs and 4-6 GB Memory
 
 Ideally for a developer machine, you will want to allocate something like:
 6 CPUs, 8 GB Memory, 4 GB Swap.
