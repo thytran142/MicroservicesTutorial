@@ -1,14 +1,13 @@
 package com.broadleafsamples.tutorials.services.catalog.dataexport.converter;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
+import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withReference;
 
 import com.broadleafcommerce.catalog.dataexport.converter.ProductExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ToStringConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.support.ConversionUtils;
 import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.TutorialJpaProduct;
 
-import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
@@ -30,10 +29,8 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
     @Override
     public Map<String, String> convert(Product source) {
         Map<String, String> result = super.convert(source);
-        Method getMyProperty = ReflectionUtils.findMethod(source.getClass(), "getMyProperty");
-        Assert.notNull(getMyProperty, "Expected a getMyProperty method");
         ConversionUtils.putIfNotNull(TutorialFields.MY_PROPERTY,
-                (String) ReflectionUtils.invokeMethod(getMyProperty, source), result);
+                withReference(TutorialJpaProduct.class).andTarget(source).getMyProperty(), result);
         return result;
     }
 
