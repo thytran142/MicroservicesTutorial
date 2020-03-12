@@ -1,0 +1,1193 @@
+:toc:
+:icons: font
+:source-highlighter: prettify
+:sectnums:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= Managing a Custom `CatalogService` Entity
+
+== Project Goal
+
+In this tutorial we’ll create a few custom entities, services, and endpoints on top of the existing
+Broadleaf `CatalogServices` library.
+
+[NOTE]
+====
+The guides here assume you are building these customizations on a base project that has
+already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
+or `MicroservicesStarter` for details.
+
+Also be aware that this project is set up to only load the `Catalog` microservice
+alongside some additional supporting services. Not all backend commerce APIs
+are needed for the scope of this tutorial.
+====
+
+[TIP]
+====
+We recommend following along with this guide in the order in which it is presented. Each section
+may build on and reference extensions created in a previous section.
+
+Once you're done,
+you can check your results against the code in this project:
+`MicroservicesTutorial/ms-tutorial-new-entity-complete`
+====
+
+== Example Scenario
+
+For this example, we will assume our `CatalogServices` are being used to support managing items
+that might be specific to the Grocery industry. In this scenario, we may want to manage not only
+things like produce and beverages, but also things like recipes that can be tied to particular
+ingredients we may be selling. So, for this tutorial, we will build a simple domain
+that manages data around recipes and the relationship of recipes to a product.
+
+We’ll define a Recipe with a simple domain that has:
+
+- an ID
+- a Name
+- a Description
+
+At the end of this tutorial, you should be able to create and manage Recipes
+in the admin and associate those Recipes to a Product.
+
+==== Example Recipe Management
+++++
+<p align="center">
+  <img src="../images/MS_Recipe.png" alt="Microservices Admin Recipe Management" width="738">
+</p>
+++++
+
+==== Example Product Recipe Association
+++++
+<p align="center">
+  <img src="../images/MS_ProductRecipe.png" alt="Microservices Admin Product Recipe Association" width="738">
+</p>
+++++
+
+
+== Define a `Recipe` Projection Domain
+
+In our project, let’s create a new class called Recipe in the following package
+`src/main/java/com/broadleafsamples/tutorials/services/domain` that looks like below:
+
+[source,java]
+----
+import com.broadleafcommerce.catalog.domain.RequestView;
+import com.broadleafcommerce.catalog.domain.ResponseView;
+import com.broadleafcommerce.data.tracking.core.ContextStateAware;
+import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
+import lombok.experimental.Accessors;
+
+@Data
+@With
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonView({RequestView.class, ResponseView.class})
+@Accessors(chain = true)
+public class Recipe implements Serializable, ContextStateAware {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * The context ID of the recipe.
+     *
+     * @param id the context ID of the recipe
+     * @return the context ID of the recipe
+     */
+    @JsonView(ResponseView.class)
+    private String id;
+
+    /**
+     * The name of the recipe.
+     *
+     * @param name the name of the recipe
+     * @return the name of the recipe
+     */
+    private String name;
+
+    /**
+     * HTML-formatted description of the recipe.
+     *
+     * @param description the HTML-formatted description of the recipe
+     * @return the HTML-formatted description of the recipe
+     */
+    private String description;
+
+    /**
+     * A subset of {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking}
+     * information to expose the context state for this object.
+     *
+     * @param contextState
+     * a subset of {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking}
+     * information to expose the context state for this object
+     * @return a subset of
+     * {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking} information to
+     * expose the context state for this object
+     */
+    @JsonView(ResponseView.class)
+    @Accessors(chain = false)
+    private ContextState contextState;
+
+}
+----
+
+== Define a `Recipe` Repository Domain
+Next, let's create a JPA domain called `JpaRecipe` in the following package:
+`src/main/java/com/broadleafsamples/tutorials/services/catalog/provider/jpa/domain`
+
+[source, java]
+----
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.modelmapper.Conditions;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+
+import com.broadleafcommerce.common.jpa.JpaConstants;
+import com.broadleafcommerce.data.tracking.core.CatalogTrackable;
+import com.broadleafcommerce.data.tracking.core.mapping.BusinessTypeAware;
+import com.broadleafcommerce.data.tracking.core.mapping.FilterAndSortAlias;
+import com.broadleafcommerce.data.tracking.core.mapping.ModelMapperMappable;
+import com.broadleafcommerce.data.tracking.jpa.UlidConverter;
+import com.broadleafcommerce.data.tracking.jpa.filtering.TrackingListener;
+import com.broadleafcommerce.data.tracking.jpa.filtering.domain.CatalogJpaTracking;
+import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
+
+import java.io.Serializable;
+import java.util.Optional;
+
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Table(name = "MY_RECIPE")
+@Data
+@EqualsAndHashCode(exclude = "_id")
+@EntityListeners(TrackingListener.class)
+public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTracking>,
+        ModelMapperMappable, BusinessTypeAware {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(generator = "blcid")
+    @GenericGenerator(name = "blcid", strategy = "blcid")
+    @Type(type = "com.broadleafcommerce.data.tracking.jpa.hibernate.ULidType")
+    @Column(name = "ID", nullable = false)
+    @SuppressWarnings("squid:S00116")
+    private String _id;
+
+    @Column(name = "CONTEXT_ID")
+    @Convert(converter = UlidConverter.class)
+    @FilterAndSortAlias("id")
+    private String contextId;
+
+    @Embedded
+    private CatalogJpaTracking tracking;
+
+    @Column(name = "NAME")
+    private String name;
+
+    @Column(name = "DESCRIPTION", length = JpaConstants.MEDIUM_TEXT_LENGTH)
+    private String description;
+
+    @Override
+    public ModelMapper fromMe() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.createTypeMap(JpaRecipe.class, Recipe.class)
+                .addMapping(JpaRecipe::getContextId, Recipe::setId);
+        return mapper;
+    }
+
+    @Override
+    public ModelMapper toMe() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.createTypeMap(Recipe.class, JpaRecipe.class)
+                .addMappings(mapping -> mapping.when(Conditions.isNotNull())
+                        .map(Recipe::getId, JpaRecipe::setContextId));
+        return mapper;
+    }
+
+    @Override
+    public Class<?> getBusinessDomainType() {
+        return Recipe.class;
+    }
+
+    @Override
+    public Optional<String> getDisplay() {
+        return Optional.ofNullable(getName());
+    }
+}
+----
+
+[NOTE]
+====
+Broadleaf provides mechanism’s that allow entities to undergo "Trackable" behavior.
+For example, if we wish the management of our Recipe’s to be catalog discriminatable
+(as well as undergo sandboxing behavior if that library is included),
+then we’ll need to make sure that we implement our classes in the appropriate way.
+
+In this example, let’s assume that Recipe is a "Trackable" entity
+====
+
+== Create a JPA Repository
+Next, we'll need to create a Spring Data JPA Repository Interface in the following package:
+`src/main/java/com/broadleafsamples/tutorials/services/catalog/repository`
+
+[source, java]
+----
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Repository;
+
+import com.broadleafcommerce.data.tracking.core.Trackable;
+import com.broadleafcommerce.data.tracking.core.TrackableRepository;
+import com.broadleafcommerce.data.tracking.core.TrackableRsqlFilterExecutor;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.filtering.Narrow;
+import com.broadleafcommerce.data.tracking.core.policy.Policy;
+import com.broadleafcommerce.data.tracking.core.type.OperationType;
+import com.broadleafcommerce.data.tracking.jpa.filtering.narrow.JpaNarrowExecutor;
+import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
+
+import java.util.Collection;
+
+@Repository
+@Narrow(JpaNarrowExecutor.class)
+public interface RecipeRepository<D extends JpaRecipe & Trackable> extends TrackableRepository<D>,
+        TrackableRsqlFilterExecutor<D> {
+
+    @Policy(operationTypes = OperationType.READ)
+    @NonNull
+    Page<D> findByContextIdIn(@NonNull Collection<String> contextIds,
+                              @Nullable Pageable page,
+                              @Nullable ContextInfo contextInfo);
+
+}
+----
+
+== Enable Spring Repositories and Entities
+
+You'll want to enable the appropriate annotations to inform the system
+of your repositories and entities. You can create a configuration class
+in the following package `src/main/java/com/broadleafsamples/tutorials/services/catalog/config`
+
+[source, java]
+----
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import com.broadleafcommerce.catalog.provider.jpa.autoconfigure.CatalogJpaAutoConfiguration;
+import com.broadleafcommerce.common.jpa.data.entity.JpaEntityScan;
+import com.broadleafcommerce.data.tracking.jpa.filtering.narrow.factory.JpaTrackableRepositoryFactoryBean;
+import com.broadleafsamples.tutorials.services.catalog.repository.RecipeRepository;
+
+@ConditionalOnProperty(name = "broadleaf.database.provider", havingValue = "jpa")
+@Configuration
+@EnableJpaRepositories(basePackageClasses = RecipeRepository.class,
+        repositoryFactoryBeanClass = JpaTrackableRepositoryFactoryBean.class,
+        entityManagerFactoryRef = "catalogEntityManagerFactory",
+        transactionManagerRef = "catalogTransactionManager")
+@JpaEntityScan(basePackages = "com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain",
+        routePackage = "com.broadleafcommerce.catalog")
+@AutoConfigureAfter(CatalogJpaAutoConfiguration.class)
+public class TutorialCatalogConfig {
+}
+----
+
+== Define Your Service Layer
+Next, let’s create a `RecipeService` that will facilitate the conversion from business domain and
+repository domain as well as provide any additional business logic.
+This service will be used by our exposed endpoint. First, create an interface called `RecipeService`
+in the following directory: `src/main/java/com/broadleafsamples/tutorials/services/catalog/service`
+
+[source, java]
+----
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.service.RsqlCrudEntityService;
+import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
+
+import java.util.Collection;
+
+public interface RecipeService <P extends Recipe> extends RsqlCrudEntityService<P> {
+
+    @NonNull
+    Page<P> readAllByContextIds(@NonNull Collection<String> contextIds,
+                                @Nullable Pageable page,
+                                @Nullable ContextInfo contextInfo);
+
+}
+----
+
+Now, we'll need to define an implementation called `MyRecipeService` that implements
+this interface in the following directory:
+`src/main/java/com/broadleafsamples/tutorials/services/catalog/service`
+
+[source, java]
+----
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import com.broadleafcommerce.data.tracking.core.Trackable;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.service.BaseRsqlCrudEntityService;
+import com.broadleafcommerce.data.tracking.core.service.RsqlCrudEntityHelper;
+import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
+import com.broadleafsamples.tutorials.services.catalog.repository.RecipeRepository;
+
+import java.util.Collection;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+
+@Service
+public class MyRecipeService<P extends Recipe> extends BaseRsqlCrudEntityService<P>
+        implements RecipeService<P> {
+
+    @Getter(value = AccessLevel.PROTECTED, onMethod_ = {@NonNull})
+    private final RecipeRepository repository;
+
+    public MyRecipeService(RecipeRepository repository,
+                              RsqlCrudEntityHelper helper) {
+        super(repository, helper);
+        this.repository = repository;
+    }
+
+    @Override
+    public Page<P> readAllByContextIds(@NonNull Collection<String> contextIds,
+                                       Pageable page,
+                                       ContextInfo contextInfo) {
+        return repository.findByContextIdIn(contextIds, page, contextInfo)
+                .map(domain -> convertFromPersistentDomain((Trackable) domain, contextInfo));
+    }
+
+}
+----
+
+== Create a `Recipe` Endpoint
+
+Finally, let's tie this all together and create a `Recipe` REST Controller that utilizes
+the `RecipeService` which we just created. Create a `RecipeEndpoint` in the following
+directory: `src/main/java/com/broadleafsamples/tutorials/services/catalog/web/endpoint`
+
+[source, java]
+----
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.broadleafcommerce.catalog.domain.RequestView;
+import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.common.extension.data.DataRouteByExample;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
+import com.broadleafcommerce.data.tracking.core.policy.Policy;
+import com.broadleafcommerce.data.tracking.core.type.OperationType;
+import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
+import com.broadleafsamples.tutorials.services.catalog.service.RecipeService;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import javax.servlet.http.HttpServletRequest;
+
+import cz.jirutka.rsql.parser.ast.Node;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@RestController
+@AllArgsConstructor
+@DataRouteByExample(Product.class)
+public class RecipeEndpoint {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeService<Recipe> recipeService;
+
+    @GetMapping("/recipes")
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public Page<Recipe> readAllRecipes(HttpServletRequest request,
+                            @ContextOperation(value = OperationType.READ) ContextInfo context,
+                            @RequestParam(value = "q", required = false) String query,
+                            @PageableDefault(size = 50) Pageable page,
+                            Node filters) {
+        return recipeService.readAll(filters, page, context);
+    }
+
+    @PostMapping(value = "/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public Recipe createRecipe(HttpServletRequest request,
+                     @ContextOperation(value = OperationType.CREATE) ContextInfo context,
+                     @RequestBody Recipe req) {
+        return recipeService.create(req, context);
+    }
+
+    @GetMapping("/recipes/{id}")
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public Recipe readRecipeById(HttpServletRequest request,
+                       @ContextOperation ContextInfo context,
+                       @PathVariable("id") String id) {
+        return recipeService.readByContextId(id, context);
+    }
+
+    @PatchMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public Recipe updateRecipe(HttpServletRequest request,
+                     @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
+                     @PathVariable("id") String id,
+                     @JsonView(RequestView.class) @RequestBody Recipe req) {
+        return recipeService.update(id, req, context);
+    }
+
+    @PutMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public Recipe replaceRecipe(HttpServletRequest request,
+                      @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
+                      @PathVariable("id") String id,
+                      @JsonView(RequestView.class) @RequestBody Recipe req) {
+        req.setId(id);
+        return recipeService.replace(id, req, context);
+    }
+
+    @DeleteMapping(value = "/recipes/{id}")
+    @Policy(permissionRoots = {RECIPE_SCOPE})
+    public void deleteRecipe(HttpServletRequest request,
+                  @ContextOperation(value = OperationType.DELETE) ContextInfo context,
+                  @PathVariable("id") String id) {
+        recipeService.delete(id, context);
+    }
+
+}
+----
+
+[IMPORTANT]
+====
+For the purposes of this tutorial, we'll be utilizing the same security scope
+as `PRODUCT` purely as a way to make the steps in this tutorial easier to follow.
+In practice, you may wish to create granual permissions scopes specifically
+for your new entities and then make sure the `AUTH` service is aware of those
+new scopes.
+
+====
+
+== Associating `Recipes` with `Products`
+Now that we've got the key components in each of the architectural layers,
+let's go ahead and create a new domain, repository, service, and endpoint
+to manage the relationship between a `Product` and a `Recipe`.
+
+We'll leave creating these components as an exercise for the reader.
+
+[TIP]
+====
+Once you're done,
+you can check your results against the code in this project:
+`MicroservicesTutorial/ms-tutorial-new-entity-complete`
+====
+
+You'll want to create the following:
+
+- a `ProductRecipe` projection domain that links a `Recipe` and a `Product`
+- a `JpaProductRecipe` repository domain that does the same
+- a `ProductRecipeRepository` interface
+- a `ProductRecipeService` interface and implementation
+
+You'll also want to create the following REST Controller with a few specific
+endpoints that will help us facilitate a couple things later in this tutorial.
+Create a `ProductRecipeEndpoint` in the following
+directory: `src/main/java/com/broadleafsamples/tutorials/services/catalog/web/endpoint`
+
+[source, java]
+----
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.catalog.service.product.ProductService;
+import com.broadleafcommerce.common.extension.data.DataRouteByExample;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
+import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
+import com.broadleafcommerce.data.tracking.core.mapping.support.HydrationUtility;
+import com.broadleafcommerce.data.tracking.core.policy.Policy;
+import com.broadleafcommerce.data.tracking.core.type.OperationType;
+import com.broadleafsamples.tutorials.services.catalog.domain.ProductRecipe;
+import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
+import com.broadleafsamples.tutorials.services.catalog.service.ProductRecipeService;
+import com.broadleafsamples.tutorials.services.catalog.service.RecipeService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import cz.jirutka.rsql.parser.ast.Node;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@DataRouteByExample(Product.class)
+public class ProductRecipeEndpoint {
+
+    public static final String CATALOG_SCOPE = "CATALOG";
+    public static final String PRODUCT_SCOPE = "PRODUCT";
+
+    @Getter(AccessLevel.PROTECTED)
+    private final ProductService<Product> productSvc;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeService<Recipe> recipeService;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final ProductRecipeService<ProductRecipe> productRecipeService;
+
+    @GetMapping("/products/{id}/recipes")
+    @Policy(permissionRoots = {PRODUCT_SCOPE, CATALOG_SCOPE})
+    public Page<ProductRecipe> readProductRecipes(@PathVariable("id") String productId,
+                            @PageableDefault(size = 50) Pageable page,
+                            @ContextOperation(value = OperationType.READ) ContextInfo contextInfo,
+                            Node filters) {
+        final Product product = productSvc.readByContextId(productId, contextInfo);
+        final Page<ProductRecipe> results = productRecipeService
+                .readByProductContextId(productId, filters, page, contextInfo);
+
+        List<String> recipeIdsFromResults =
+                results.map(productRecipe -> productRecipe.getRecipe().getId()).getContent();
+        Map<String, Recipe> recipes = fetchRecipes(recipeIdsFromResults, contextInfo);
+
+        return results.map(productRecipe -> {
+            productRecipe.setProduct(product);
+            String recipeId = productRecipe.getRecipe().getId();
+            HydrationUtility.hydrateIfNotNull(
+                    recipes.get(recipeId),
+                    productRecipe::setRecipe,
+                    HydrationUtility.getGenericErrorMessage(
+                            "ProductRecipe#recipe",
+                            "Recipe",
+                            productId));
+            return productRecipe;
+        });
+    }
+
+    @PostMapping(value = "/products/{id}/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = {PRODUCT_SCOPE, CATALOG_SCOPE})
+    public ProductRecipe addProductRecipe(@PathVariable("id") String productId,
+                        @RequestBody ProductRecipe productRecipe,
+                        @ContextOperation(value = OperationType.CREATE) ContextInfo contextInfo) {
+
+        Product product = productSvc.readByContextId(productId, contextInfo);
+        Recipe childRecipe =
+                recipeService.readByContextId(productRecipe.getRecipe().getId(), contextInfo);
+
+        productRecipe.setProduct(product);
+        ProductRecipe result = productRecipeService.create(productRecipe, contextInfo);
+
+        // hydrate the response
+        result.setProduct(product);
+        result.setRecipe(childRecipe);
+        return result;
+    }
+
+    @DeleteMapping("/products/{id}/recipes/{productRecipeId}")
+    @Policy(permissionRoots = {PRODUCT_SCOPE, CATALOG_SCOPE})
+    public void removeGeneralProduct(@PathVariable("id") String productId,
+                         @PathVariable("productRecipeId") String productRecipeId,
+                         @ContextOperation(value = OperationType.DELETE) ContextInfo contextInfo) {
+        ProductRecipe productRecipe =
+                productRecipeService.readByContextId(productRecipeId, contextInfo);
+        if (ObjectUtils.notEqual(productId, productRecipe.getProduct().getId())) {
+            throw new EntityMissingException();
+        }
+        productRecipeService.delete(productRecipe.getId(), contextInfo);
+    }
+
+    private Map<String, Recipe> fetchRecipes(List<String> benefitIds,
+                                               ContextInfo contextInfo) {
+        Page<Recipe> recipes =
+                recipeService.readAllByContextIds(benefitIds, Pageable.unpaged(), contextInfo);
+
+        return recipes.stream()
+                .collect(Collectors.toMap(Recipe::getId, Function.identity()));
+    }
+}
+----
+
+== Managing `Recipes` and `ProductRecipes` in the Admin with Metadata
+Now that we have all the backend APIs for our new entities created, let's create
+the metadata to manage them in the Admin.
+
+=== Create `RecipeFields` to define a Recipe's managed fields
+Create a class in the following directory:
+`scr/main/java/com/broadleafsamples/tutorials/services/metadata/recipe`
+
+[source,java]
+----
+import com.broadleafcommerce.metadata.contribute.DefaultFieldLibrary;
+import com.broadleafcommerce.metadata.domain.FieldComponent;
+import com.broadleafcommerce.metadata.domain.builder.field.LookupFieldBuilder;
+import com.broadleafcommerce.metadata.domain.type.FieldType;
+
+public class RecipeFields extends DefaultFieldLibrary {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+    public static final String RECIPE = "recipe";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+
+    public RecipeFields() {
+        add(FieldComponent.builder(NAME)
+                .label("Name"));
+
+        add(FieldComponent.builder(FieldType.HTML, DESCRIPTION)
+                .label("Description"));
+
+        add(this.createRecipeLookup(RECIPE)
+                .label("Select Recipe")
+                .required(true));
+
+    }
+
+    public LookupFieldBuilder createRecipeLookup(String name) {
+        return new LookupFieldBuilder(LookupFieldBuilder.SelectionType.OPTION,
+                name,
+                "Recipe",
+                readEndpoint -> readEndpoint
+                        .narrowPaging()
+                        .param("q", "${filter.q}")
+                        .param("cq", "${filter.cq}")
+                        .scope(RECIPE_SCOPE)
+                        .uri("/catalog/recipes"))
+                .catalogDiscriminated()
+                .sandboxDiscriminated("RECIPES")
+                .configureHydration(
+                        hydrateEndpointBuilder -> hydrateEndpointBuilder
+                                .scope(RECIPE_SCOPE)
+                                .uri("/catalog/recipes/${id}"))
+                .configureSelect(LookupFieldBuilder.SelectComponents.DEFAULT)
+                .configureModal(
+                        modalBuilder -> modalBuilder
+                                .label("Select Recipe")
+                                .configureQuery()
+                                .configureQueryBuilder()
+                                .column(this.get(RecipeFields.NAME)
+                                        .order(1000)
+                                        .build())
+                                .column(this.get(RecipeFields.DESCRIPTION)
+                                        .order(2000)
+                                        .build()));
+    }
+
+}
+----
+
+=== Create `RecipeForms` to define general create, browse, and update forms.
+Create a `RecipeForms` class in the following directory:
+`src/main/java/com/broadleafsamples/tutorials/services/metadata/recipe`
+
+[source,java]
+----
+import com.broadleafcommerce.metadata.domain.Component;
+import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
+
+import java.util.Arrays;
+import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class RecipeForms {
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeFields recipeFields;
+
+    protected EntityFormBuilder generalCreateForm() {
+        return generalForm("recipeCreateForm");
+    }
+
+    protected EntityFormBuilder generalEditForm() {
+        return generalForm("recipeUpdateForm");
+    }
+
+    protected EntityFormBuilder generalForm(String id) {
+        EntityFormBuilder form = new EntityFormBuilder(id, "Recipes");
+        generalFields().forEach(form::addComponent);
+        return form;
+    }
+
+    protected List<Component> generalFields() {
+        return Arrays.asList(
+                recipeFields.get(RecipeFields.NAME)
+                        .order(1000)
+                        .build(),
+                recipeFields.get(RecipeFields.DESCRIPTION)
+                        .order(2000)
+                        .build());
+    }
+
+}
+----
+
+=== Create `ComponentContributors` for Browse, Create, and Edit Views
+
+Next, we'll need to create the following view contributors in the following directory:
+`src/main/java/com/broadleafsamples/tutorials/services/metadata/recipe`
+
+- RecipeBrowseViewContributor
+- RecipeCreateViewContributor
+- RecipeEditViewContributor
+
+[source,java]
+----
+import com.broadleafcommerce.metadata.contribute.ComponentContributor;
+import com.broadleafcommerce.metadata.domain.Component;
+import com.broadleafcommerce.metadata.domain.Link;
+import com.broadleafcommerce.metadata.domain.builder.EntityGridBuilder;
+import com.broadleafcommerce.metadata.domain.type.ComponentClassifier;
+import com.broadleafcommerce.metadata.domain.type.FieldType;
+import com.broadleafcommerce.metadata.domain.type.ViewType;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class RecipeBrowseViewContributor implements ComponentContributor {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+    public static final String ID = "catalog:recipes:list";
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeFields fields;
+
+    @Override
+    public Component contribute() {
+        // @formatter:off
+        return Component.builder(ComponentClassifier.VIEW, ViewType.ENTITY_BROWSE_VIEW)
+                .id(ID)
+                .label("Recipes")
+                .scope(RECIPE_SCOPE)
+                .subComponent(new EntityGridBuilder("mainRecipesGridView",
+                        RECIPE_SCOPE,
+                        "/catalog/recipes",
+                        "Recipes")
+                        .sandboxDiscriminated("RECIPE")
+                        .catalogDiscriminated()
+                        .enableFulltextSearch("query")
+                        .enableAdvancedSearchQueryBuilder("cq")
+                        .enableNumberedPaging()
+                        .enableColumnSorting()
+                        .enableAddButton("Add", Link.byId(RecipeCreateViewContributor.ID))
+                        .addField(fields.get(RecipeFields.NAME)
+                                .type(FieldType.Grid.LINK)
+                                .order(1000)
+                                .attribute("link", Link.byId(RecipeEditViewContributor.ID), Link.class)
+                                .build())
+                        .addField(fields.get(RecipeFields.DESCRIPTION)
+                                .order(2000)
+                                .build())
+                        .translationsAware()
+                        .build())
+                .build();
+        // @formatter:on
+    }
+}
+----
+
+[source,java]
+----
+import com.broadleafcommerce.metadata.contribute.ComponentContributor;
+import com.broadleafcommerce.metadata.domain.Component;
+import com.broadleafcommerce.metadata.domain.Link;
+import com.broadleafcommerce.metadata.domain.builder.CreateEntityViewBuilder;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class RecipeCreateViewContributor implements ComponentContributor {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+    public static final String ID = "catalog:recipes:create";
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeForms recipeForms;
+
+    @Override
+    public Component contribute() {
+        // @formatter:off
+        return new CreateEntityViewBuilder(ID,
+                RECIPE_SCOPE,
+                "/catalog/recipes",
+                "Create Recipe")
+                .sandboxDiscriminated("RECIPE")
+                .catalogDiscriminated()
+                .backLabel("Back")
+                .backLink(Link.byId(RecipeBrowseViewContributor.ID))
+                .createLabel("Create")
+                .addForm(recipeForms.generalCreateForm()
+                        .order(1000)
+                        .build())
+                .build();
+        // @formatter:on
+    }
+}
+----
+
+[source,java]
+----
+import com.broadleafcommerce.metadata.contribute.ComponentContributor;
+import com.broadleafcommerce.metadata.domain.Component;
+import com.broadleafcommerce.metadata.domain.Link;
+import com.broadleafcommerce.metadata.domain.builder.EditEntityViewBuilder;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class RecipeEditViewContributor implements ComponentContributor {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+    public static final String ID = "catalog:recipes:update";
+    protected static final String FULL_URI = "/catalog/recipes/${id}";
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RecipeForms recipeForms;
+
+    @Override
+    public Component contribute() {
+        // @formatter:off
+        return new EditEntityViewBuilder(ID,
+                RECIPE_SCOPE,
+                "Edit")
+                .sandboxDiscriminated("RECIPE")
+                .catalogDiscriminated()
+                .backLabel("Back")
+                .backLink(Link.byId(RecipeBrowseViewContributor.ID))
+                .fetchUri(FULL_URI)
+                .updateUri(FULL_URI)
+                .deleteUri(FULL_URI)
+                .addForm(recipeForms.generalEditForm()
+                        .order(1000)
+                        .build())
+                .build();
+        // @formatter:on
+    }
+}
+----
+
+=== Create an `@Configuration` and define your new components
+
+Create a `TutorialMetadataConfig` class in the following directory:
+`src/main/java/com/broadleafsamples/tutorials/services/metadata/config`
+
+This will not only configure routes to manage our new `Recipe` entity,
+we'll also override some `Product` metadata components in order to
+be able to create a list grid and associate one or more `Recipes` directly to a `Product`
+
+[source,java]
+----
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import com.broadleafcommerce.catalog.metadata.product.CommonPriceDataComponents;
+import com.broadleafcommerce.catalog.metadata.product.IncludedProductFields;
+import com.broadleafcommerce.catalog.metadata.product.NonSkuPriceDataComponents;
+import com.broadleafcommerce.catalog.metadata.product.ProductEditViewContributor;
+import com.broadleafcommerce.catalog.metadata.product.ProductFields;
+import com.broadleafcommerce.catalog.metadata.product.ProductForms;
+import com.broadleafcommerce.catalog.metadata.product.ProductOptionFields;
+import com.broadleafcommerce.catalog.metadata.product.ProductOptionForms;
+import com.broadleafcommerce.catalog.metadata.product.PromotionalProductFields;
+import com.broadleafcommerce.catalog.metadata.product.VariantFields;
+import com.broadleafcommerce.catalog.metadata.product.pricing.PriceDataFields;
+import com.broadleafcommerce.metadata.domain.Endpoint;
+import com.broadleafcommerce.metadata.domain.FieldComponent;
+import com.broadleafcommerce.metadata.domain.OperationType;
+import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
+import com.broadleafcommerce.metadata.domain.builder.ExternalGridBuilder;
+import com.broadleafcommerce.metadata.domain.builder.FieldGroupBuilder;
+import com.broadleafcommerce.metadata.domain.type.EndpointType;
+import com.broadleafcommerce.metadata.route.ComponentRouteLocator;
+import com.broadleafcommerce.metadata.route.builder.ComponentRouteLocatorBuilder;
+import com.broadleafsamples.tutorials.services.metadata.recipe.RecipeBrowseViewContributor;
+import com.broadleafsamples.tutorials.services.metadata.recipe.RecipeCreateViewContributor;
+import com.broadleafsamples.tutorials.services.metadata.recipe.RecipeEditViewContributor;
+import com.broadleafsamples.tutorials.services.metadata.recipe.RecipeFields;
+import com.broadleafsamples.tutorials.services.metadata.recipe.RecipeForms;
+
+import java.util.Collections;
+
+@Configuration
+public class TutorialMetadataConfig {
+
+    public static final String RECIPE_SCOPE = "PRODUCT";
+
+    @Bean
+    public ComponentRouteLocator recipeRoutes() {
+        return ComponentRouteLocatorBuilder.routes()
+                .route("/recipes",
+                        r -> r.componentId(RecipeBrowseViewContributor.ID)
+                                .scope(RECIPE_SCOPE))
+                .route("/recipes/create",
+                        r -> r.componentId(RecipeCreateViewContributor.ID)
+                                .scope(RECIPE_SCOPE))
+                .route("/recipes/:id",
+                        r -> r.componentId(RecipeEditViewContributor.ID)
+                                .scope(RECIPE_SCOPE))
+                .build();
+    }
+
+    @Bean
+    public RecipeBrowseViewContributor recipeBrowseView(RecipeFields recipeFields) {
+        return new RecipeBrowseViewContributor(recipeFields);
+    }
+
+    @Bean
+    public RecipeCreateViewContributor recipeCreateView(RecipeForms recipeForms) {
+        return new RecipeCreateViewContributor(recipeForms);
+    }
+
+    @Bean
+    public RecipeEditViewContributor recipeEditView(RecipeForms recipeForms) {
+        return new RecipeEditViewContributor(recipeForms);
+    }
+
+    @Bean
+    public RecipeForms recipeForms(RecipeFields recipeFields) {
+        return new RecipeForms(recipeFields);
+    }
+
+    @Bean
+    public RecipeFields recipeFields() {
+        return new RecipeFields();
+    }
+
+    @Bean
+    @Primary
+    public ProductEditViewContributor productEditView(ProductForms productForms,
+                                  ProductFields productFields,
+                                  ProductOptionFields productOptionFields,
+                                  VariantFields variantFields,
+                                  PromotionalProductFields promotionalProductFields,
+                                  IncludedProductFields includedProductFields,
+                                  PriceDataFields priceDataFields,
+                                  CommonPriceDataComponents commonPriceDataComponents,
+                                  ProductOptionForms optionForms,
+                                  NonSkuPriceDataComponents nonSkuPriceDataComponents) {
+
+        TutorialProductForms tutorialProductForms = new TutorialProductForms(productFields,
+                productOptionFields,
+                variantFields,
+                promotionalProductFields,
+                includedProductFields,
+                priceDataFields,
+                commonPriceDataComponents,
+                optionForms,
+                nonSkuPriceDataComponents);
+
+        return new ProductEditViewContributor(tutorialProductForms, productFields);
+    }
+
+    class TutorialProductForms extends ProductForms {
+
+        public TutorialProductForms(ProductFields productFields,
+                                    ProductOptionFields productOptionFields,
+                                    VariantFields variantFields,
+                                    PromotionalProductFields promotionalProductFields,
+                                    IncludedProductFields includedProductFields,
+                                    PriceDataFields priceDataFields,
+                                    CommonPriceDataComponents commonPriceDataComponents,
+                                    ProductOptionForms optionForms,
+                                    NonSkuPriceDataComponents nonSkuPriceDataComponents) {
+            super(productFields, productOptionFields, variantFields, promotionalProductFields,
+                    includedProductFields, priceDataFields, commonPriceDataComponents, optionForms,
+                    nonSkuPriceDataComponents);
+        }
+
+        @Override
+        protected EntityFormBuilder generalForm() {
+            return super.generalForm()
+                    .addGroup(new FieldGroupBuilder("Recipes")
+                            .id("productRecipesFieldsGroup")
+                            .addComponent(recipes().build()));
+        }
+    }
+
+    public Endpoint.EndpointBuilder createProductRecipeEndpoint() {
+        return Endpoint.builder(EndpointType.CREATE)
+                .uri("/catalog/products/${parent.id}/recipes")
+                .method(Endpoint.Method.POST)
+                .operationType(OperationType.CREATE)
+                .scope(RECIPE_SCOPE);
+    }
+
+    public ExternalGridBuilder recipes() {
+        return new ExternalGridBuilder("Recipes",
+                RECIPE_SCOPE,
+                "/catalog/products/${parent.id}/recipes")
+                .id("recipesExternalGrid")
+                .sandboxDiscriminated("PRODUCT_RECIPES")
+                .catalogDiscriminated()
+                .enableNarrowPaging()
+                .order(1000)
+                .addField(FieldComponent.builder("recipe.name")
+                        .label("Name")
+                        .order(1000)
+                        .build())
+                .addField(FieldComponent.builder("recipe.description")
+                        .label("Description")
+                        .order(2000)
+                        .build())
+                .enableCreate("Add Recipe",
+                        createProductRecipeEndpoint().build(),
+                        Collections.singletonList(
+                                recipeFields().get(RecipeFields.RECIPE)
+                                        .order(1000)
+                                        .build()))
+                .enableDelete("Remove",
+                        "/catalog/products/${parent.id}/recipes/${row.id}");
+
+    }
+
+}
+----
+
+== Add a `Recipe` Navigation Item in the Admin
+Finally, let's add a menu item in the admin, so we can navigate to these management screens.
+We can easily add some SQL for that. Create a SQL file called
+`tutorial-admin-navigation-data-jpa.sql` file and add a reference to it
+under the property `broadleaf.adminnavigation.datasource.data` in
+`application-default.yml`
+
+[source,sql]
+----
+/* Catalog - Recipes */
+INSERT INTO BLC_ADMIN_MENU_ITEM (ID, CONTEXT_ID, LABEL, ICON, URL, DISPLAY_ORDER, PARENT_MENU_ITEM_CONTEXT_ID, APPLICATION_TYPE, TRK_ARCHIVED, TRK_TENANT_ID)
+VALUES ('recipe-menu-id', 'recipe-menu-id', 'Recipes', 'location-food', '/recipes', 5000, '200', NULL, FALSE, '5DF1363059675161A85F576D');
+----
+
+== Testing Everything Out
+
+Alright, now that we have everything in place, let's go ahead and
+build and run our project and test everything out!
+
+=== Build
+First, build the project running Maven:
+
+[source,shell script]
+----
+mvn clean install
+----
+
+=== Run Project
+Next, we'll want to start up all supporting services and finally the project.
+
+[source,shell script]
+----
+docker-compose up -d
+----
+
+[source,shell script]
+----
+mvn spring-boot:run -Pnosec
+----
+
+[NOTE]
+====
+In this project, we've added a maven profile called `nosec` which
+passes in some particular properties to disable certain api security
+measures. This allows us to easily demonstrate
+some example flows using the Admin and cURL which will be shown below
+
+If you're starting from `ms-tutorial-base` you'll also
+want to add the following bean `AlwaysMutableContextStateBuilder` to your project,
+which is defined in the main Spring Boot Application class `TutorialNewEntityApplication`
+====
+
+=== Example Flows
+Once you have the admin started, you can perform the following example flow:
+
+1. Under `Applications` dropdown on the left, navigate to the `Tutorial Site`
+2. Navigate to the new `Recipe` menu item in the navigation
+3. Create a new `Recipe` e.g. "Chicken Parmesan" and click Save
+4. Create a new `Product` e.g. "12 oz. Tomato Sauce" and click Save
+5. Once you have a new `Product` you should see a list grid on the bottom that
+allows you to associate one or more `Recipes` with a `Product`, pick the one you
+created above and click Save
+
+==== Test using cURL
+
+* Give me all products back
+[source,shell script]
+----
+curl --insecure -X GET "https://localhost:8447/products?offset=0&forward=true&pageSize=50" -H "accept: application/json" -H "X-Context-Request: {\"tenantId\":\"5DF1363059675161A85F576D\",\"catalogId\":\"10\"}"
+----
+* Give me all recipes back
+[source,shell script]
+----
+curl --insecure -X GET "https://localhost:8447/recipes?offset=0&forward=true&pageSize=50" -H "accept: application/json" -H "X-Context-Request: {\"tenantId\":\"5DF1363059675161A85F576D\",\"catalogId\":\"10\"}"
+----
+
+
