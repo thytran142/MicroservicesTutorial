@@ -14,15 +14,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.broadleafcommerce.catalog.domain.RequestView;
 import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.common.extension.RequestView;
 import com.broadleafcommerce.common.extension.data.DataRouteByExample;
+import com.broadleafcommerce.common.extension.projection.Projection;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
-import com.broadleafsamples.tutorials.services.catalog.service.RecipeService;
+import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
+import com.broadleafsamples.tutorials.services.catalog.service.MyRecipeService;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,49 +41,49 @@ public class RecipeEndpoint {
     public static final String RECIPE_SCOPE = "PRODUCT";
 
     @Getter(AccessLevel.PROTECTED)
-    private final RecipeService<Recipe> recipeService;
+    private final MyRecipeService recipeService;
 
     @GetMapping("/recipes")
     @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Page<Recipe> readAllRecipes(HttpServletRequest request,
-                            @ContextOperation(value = OperationType.READ) ContextInfo context,
-                            @RequestParam(value = "q", required = false) String query,
-                            @PageableDefault(size = 50) Pageable page,
-                            Node filters) {
+    public Page<Projection<JpaRecipe>> readAllRecipes(HttpServletRequest request,
+            @ContextOperation(value = OperationType.READ) ContextInfo context,
+            @RequestParam(value = "q", required = false) String query,
+            @PageableDefault(size = 50) Pageable page,
+            Node filters) {
         return recipeService.readAll(filters, page, context);
     }
 
     @PostMapping(value = "/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe createRecipe(HttpServletRequest request,
-                     @ContextOperation(value = OperationType.CREATE) ContextInfo context,
-                     @RequestBody Recipe req) {
+    public Projection<JpaRecipe> createRecipe(HttpServletRequest request,
+            @ContextOperation(value = OperationType.CREATE) ContextInfo context,
+            @RequestBody Projection<JpaRecipe> req) {
         return recipeService.create(req, context);
     }
 
     @GetMapping("/recipes/{id}")
     @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe readRecipeById(HttpServletRequest request,
-                       @ContextOperation ContextInfo context,
-                       @PathVariable("id") String id) {
+    public Projection<JpaRecipe> readRecipeById(HttpServletRequest request,
+            @ContextOperation ContextInfo context,
+            @PathVariable("id") String id) {
         return recipeService.readByContextId(id, context);
     }
 
     @PatchMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe updateRecipe(HttpServletRequest request,
-                     @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
-                     @PathVariable("id") String id,
-                     @JsonView(RequestView.class) @RequestBody Recipe req) {
+    public Projection<JpaRecipe> updateRecipe(HttpServletRequest request,
+            @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
+            @PathVariable("id") String id,
+            @JsonView(RequestView.class) @RequestBody Projection<JpaRecipe> req) {
         return recipeService.update(id, req, context);
     }
 
     @PutMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe replaceRecipe(HttpServletRequest request,
-                      @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
-                      @PathVariable("id") String id,
-                      @JsonView(RequestView.class) @RequestBody Recipe req) {
+    public Projection<JpaRecipe> replaceRecipe(HttpServletRequest request,
+            @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
+            @PathVariable("id") String id,
+            @JsonView(RequestView.class) @RequestBody Projection<JpaRecipe> req) {
         req.setId(id);
         return recipeService.replace(id, req, context);
     }
@@ -90,8 +91,8 @@ public class RecipeEndpoint {
     @DeleteMapping(value = "/recipes/{id}")
     @Policy(permissionRoots = {RECIPE_SCOPE})
     public void deleteRecipe(HttpServletRequest request,
-                  @ContextOperation(value = OperationType.DELETE) ContextInfo context,
-                  @PathVariable("id") String id) {
+            @ContextOperation(value = OperationType.DELETE) ContextInfo context,
+            @PathVariable("id") String id) {
         recipeService.delete(id, context);
     }
 

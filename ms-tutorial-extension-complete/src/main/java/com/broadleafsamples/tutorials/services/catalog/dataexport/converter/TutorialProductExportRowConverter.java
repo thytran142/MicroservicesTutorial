@@ -1,6 +1,6 @@
 package com.broadleafsamples.tutorials.services.catalog.dataexport.converter;
 
-import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withReference;
+import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withExample;
 
 import com.broadleafcommerce.catalog.dataexport.converter.ProductExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ToStringConverter;
@@ -30,7 +30,7 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
     public Map<String, String> convert(Product source) {
         Map<String, String> result = super.convert(source);
         ConversionUtils.putIfNotNull(TutorialFields.MY_PROPERTY,
-                withReference(TutorialJpaProduct.class).andTarget(source).getMyProperty(), result);
+                withExample(TutorialJpaProduct.class).andTarget(source).getMyProperty(), result);
         return result;
     }
 
