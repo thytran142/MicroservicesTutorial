@@ -21,11 +21,11 @@ import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.mapping.support.HydrationUtility;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
+import com.broadleafcommerce.data.tracking.core.service.BaseRsqlCrudEntityService;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafsamples.tutorials.services.catalog.domain.ProductRecipe;
 import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
 import com.broadleafsamples.tutorials.services.catalog.service.MyProductRecipeService;
-import com.broadleafsamples.tutorials.services.catalog.service.MyRecipeService;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ProductRecipeEndpoint {
     private final ProductService<Product> productSvc;
 
     @Getter(AccessLevel.PROTECTED)
-    private final MyRecipeService recipeService;
+    private final BaseRsqlCrudEntityService<Projection<JpaRecipe>> recipeService;
 
     @Getter(AccessLevel.PROTECTED)
     private final MyProductRecipeService productRecipeService;
