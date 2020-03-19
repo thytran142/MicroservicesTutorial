@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.broadleafcommerce.catalog.provider.jpa.autoconfigure.CatalogJpaAutoConfiguration;
 import com.broadleafcommerce.common.jpa.data.entity.JpaEntityScan;
-import com.broadleafcommerce.data.tracking.jpa.filtering.EnableJpaTrackableFlows;
+import com.broadleafcommerce.data.tracking.jpa.filtering.auto.EnableJpaTrackableFlow;
 import com.broadleafcommerce.data.tracking.jpa.filtering.narrow.factory.JpaTrackableRepositoryFactoryBean;
 import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
 import com.broadleafsamples.tutorials.services.catalog.repository.ProductRecipeRepository;
@@ -21,7 +21,7 @@ import com.broadleafsamples.tutorials.services.catalog.repository.ProductRecipeR
         repositoryFactoryBeanClass = JpaTrackableRepositoryFactoryBean.class,
         entityManagerFactoryRef = "catalogEntityManagerFactory",
         transactionManagerRef = "catalogTransactionManager")
-@EnableJpaTrackableFlows(entityClasses = JpaRecipe.class, routeKey = CATALOG_ROUTE_KEY,
+@EnableJpaTrackableFlow(entityClass = JpaRecipe.class, routeKey = CATALOG_ROUTE_KEY,
         permissionRoots = "PRODUCT", rootPath = "/recipes")
 @JpaEntityScan(basePackages = "com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain",
         routePackage = CATALOG_ROUTE_PACKAGE)
