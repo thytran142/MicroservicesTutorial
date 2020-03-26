@@ -22,7 +22,7 @@ import com.broadleafsamples.tutorials.services.catalog.repository.ProductRecipeR
         entityManagerFactoryRef = "catalogEntityManagerFactory",
         transactionManagerRef = "catalogTransactionManager")
 @EnableJpaTrackableFlow(entityClass = JpaRecipe.class, routeKey = CATALOG_ROUTE_KEY,
-        permissionRoots = "PRODUCT", rootPath = "/recipes")
+        permissionRoots = "PRODUCT", rootPath = "/recipes", projectionName = "Recipe")
 @JpaEntityScan(basePackages = "com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain",
         routePackage = CATALOG_ROUTE_PACKAGE)
 @AutoConfigureAfter(CatalogJpaAutoConfiguration.class)
