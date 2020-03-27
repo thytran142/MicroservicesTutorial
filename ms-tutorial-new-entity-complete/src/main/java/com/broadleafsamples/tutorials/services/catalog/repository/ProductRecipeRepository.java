@@ -6,7 +6,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
-import com.broadleafcommerce.data.tracking.core.Trackable;
 import com.broadleafcommerce.data.tracking.core.TrackableRepository;
 import com.broadleafcommerce.data.tracking.core.TrackableRsqlFilterExecutor;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
@@ -20,14 +19,15 @@ import cz.jirutka.rsql.parser.ast.Node;
 
 @Repository
 @Narrow(JpaNarrowExecutor.class)
-public interface ProductRecipeRepository<D extends JpaProductRecipe & Trackable>
-        extends TrackableRepository<D>, TrackableRsqlFilterExecutor<D> {
+public interface ProductRecipeRepository
+        extends TrackableRepository<JpaProductRecipe>,
+        TrackableRsqlFilterExecutor<JpaProductRecipe> {
 
     @Policy(operationTypes = OperationType.READ)
     @NonNull
-    Page<D> findByProductContextId(@NonNull String productContextId,
-                                   Node filters,
-                                   Pageable page,
-                                   @Nullable ContextInfo contextInfo);
-    
+    Page<JpaProductRecipe> findByProductContextId(@NonNull String productContextId,
+            Node filters,
+            Pageable page,
+            @Nullable ContextInfo contextInfo);
+
 }

@@ -1,10 +1,12 @@
 package com.broadleafsamples.tutorials.services.catalog.domain;
 
-import com.broadleafcommerce.catalog.domain.RequestView;
-import com.broadleafcommerce.catalog.domain.ResponseView;
 import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.common.extension.RequestView;
+import com.broadleafcommerce.common.extension.ResponseView;
+import com.broadleafcommerce.common.extension.projection.Projection;
 import com.broadleafcommerce.data.tracking.core.ContextStateAware;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
+import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -30,7 +32,7 @@ public class ProductRecipe implements Serializable, ContextStateAware {
     @JsonView(ResponseView.class)
     private String id;
 
-    private Recipe recipe;
+    private Projection<JpaRecipe> recipe;
 
     private Product product;
 

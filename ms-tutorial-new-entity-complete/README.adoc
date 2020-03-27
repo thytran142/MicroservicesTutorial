@@ -69,104 +69,21 @@ in the admin and associate those Recipes to a Product.
 </p>
 ++++
 
-
-== Define a `Recipe` Projection Domain
-
-In our project, let’s create a new class called Recipe in the following package
-`src/main/java/com/broadleafsamples/tutorials/services/domain` that looks like below:
-
-[source,java]
-----
-import com.broadleafcommerce.catalog.domain.RequestView;
-import com.broadleafcommerce.catalog.domain.ResponseView;
-import com.broadleafcommerce.data.tracking.core.ContextStateAware;
-import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import java.io.Serializable;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import lombok.experimental.Accessors;
-
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonView({RequestView.class, ResponseView.class})
-@Accessors(chain = true)
-public class Recipe implements Serializable, ContextStateAware {
-
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * The context ID of the recipe.
-     *
-     * @param id the context ID of the recipe
-     * @return the context ID of the recipe
-     */
-    @JsonView(ResponseView.class)
-    private String id;
-
-    /**
-     * The name of the recipe.
-     *
-     * @param name the name of the recipe
-     * @return the name of the recipe
-     */
-    private String name;
-
-    /**
-     * HTML-formatted description of the recipe.
-     *
-     * @param description the HTML-formatted description of the recipe
-     * @return the HTML-formatted description of the recipe
-     */
-    private String description;
-
-    /**
-     * A subset of {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking}
-     * information to expose the context state for this object.
-     *
-     * @param contextState
-     * a subset of {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking}
-     * information to expose the context state for this object
-     * @return a subset of
-     * {@link com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking} information to
-     * expose the context state for this object
-     */
-    @JsonView(ResponseView.class)
-    @Accessors(chain = false)
-    private ContextState contextState;
-
-}
-----
-
 == Define a `Recipe` Repository Domain
-Next, let's create a JPA domain called `JpaRecipe` in the following package:
+First, let's create a JPA domain called `JpaRecipe` in the following package:
 `src/main/java/com/broadleafsamples/tutorials/services/catalog/provider/jpa/domain`
 
 [source, java]
 ----
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.modelmapper.Conditions;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 import com.broadleafcommerce.common.jpa.JpaConstants;
 import com.broadleafcommerce.data.tracking.core.CatalogTrackable;
-import com.broadleafcommerce.data.tracking.core.mapping.BusinessTypeAware;
 import com.broadleafcommerce.data.tracking.core.mapping.FilterAndSortAlias;
-import com.broadleafcommerce.data.tracking.core.mapping.ModelMapperMappable;
 import com.broadleafcommerce.data.tracking.jpa.UlidConverter;
 import com.broadleafcommerce.data.tracking.jpa.filtering.TrackingListener;
 import com.broadleafcommerce.data.tracking.jpa.filtering.domain.CatalogJpaTracking;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -188,8 +105,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(exclude = "_id")
 @EntityListeners(TrackingListener.class)
-public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTracking>,
-        ModelMapperMappable, BusinessTypeAware {
+public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTracking> {
 
     private static final long serialVersionUID = 1L;
 
@@ -216,30 +132,6 @@ public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTrack
     private String description;
 
     @Override
-    public ModelMapper fromMe() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        mapper.createTypeMap(JpaRecipe.class, Recipe.class)
-                .addMapping(JpaRecipe::getContextId, Recipe::setId);
-        return mapper;
-    }
-
-    @Override
-    public ModelMapper toMe() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        mapper.createTypeMap(Recipe.class, JpaRecipe.class)
-                .addMappings(mapping -> mapping.when(Conditions.isNotNull())
-                        .map(Recipe::getId, JpaRecipe::setContextId));
-        return mapper;
-    }
-
-    @Override
-    public Class<?> getBusinessDomainType() {
-        return Recipe.class;
-    }
-
-    @Override
     public Optional<String> getDisplay() {
         return Optional.ofNullable(getName());
     }
@@ -256,44 +148,6 @@ then we’ll need to make sure that we implement our classes in the appropriate 
 In this example, let’s assume that Recipe is a "Trackable" entity
 ====
 
-== Create a JPA Repository
-Next, we'll need to create a Spring Data JPA Repository Interface in the following package:
-`src/main/java/com/broadleafsamples/tutorials/services/catalog/repository`
-
-[source, java]
-----
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Repository;
-
-import com.broadleafcommerce.data.tracking.core.Trackable;
-import com.broadleafcommerce.data.tracking.core.TrackableRepository;
-import com.broadleafcommerce.data.tracking.core.TrackableRsqlFilterExecutor;
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.data.tracking.core.filtering.Narrow;
-import com.broadleafcommerce.data.tracking.core.policy.Policy;
-import com.broadleafcommerce.data.tracking.core.type.OperationType;
-import com.broadleafcommerce.data.tracking.jpa.filtering.narrow.JpaNarrowExecutor;
-import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
-
-import java.util.Collection;
-
-@Repository
-@Narrow(JpaNarrowExecutor.class)
-public interface RecipeRepository<D extends JpaRecipe & Trackable> extends TrackableRepository<D>,
-        TrackableRsqlFilterExecutor<D> {
-
-    @Policy(operationTypes = OperationType.READ)
-    @NonNull
-    Page<D> findByContextIdIn(@NonNull Collection<String> contextIds,
-                              @Nullable Pageable page,
-                              @Nullable ContextInfo contextInfo);
-
-}
-----
-
 == Enable Spring Repositories and Entities
 
 You'll want to enable the appropriate annotations to inform the system
@@ -302,6 +156,9 @@ in the following package `src/main/java/com/broadleafsamples/tutorials/services/
 
 [source, java]
 ----
+import static com.broadleafcommerce.catalog.provider.jpa.Constants.Persistence.CATALOG_ROUTE_KEY;
+import static com.broadleafcommerce.catalog.provider.jpa.Constants.Persistence.CATALOG_ROUTE_PACKAGE;
+
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -309,208 +166,37 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.broadleafcommerce.catalog.provider.jpa.autoconfigure.CatalogJpaAutoConfiguration;
 import com.broadleafcommerce.common.jpa.data.entity.JpaEntityScan;
+import com.broadleafcommerce.data.tracking.jpa.filtering.auto.EnableJpaTrackableFlow;
 import com.broadleafcommerce.data.tracking.jpa.filtering.narrow.factory.JpaTrackableRepositoryFactoryBean;
-import com.broadleafsamples.tutorials.services.catalog.repository.RecipeRepository;
+import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
+import com.broadleafsamples.tutorials.services.catalog.repository.ProductRecipeRepository;
 
 @ConditionalOnProperty(name = "broadleaf.database.provider", havingValue = "jpa")
 @Configuration
-@EnableJpaRepositories(basePackageClasses = RecipeRepository.class,
+@EnableJpaRepositories(basePackageClasses = ProductRecipeRepository.class,
         repositoryFactoryBeanClass = JpaTrackableRepositoryFactoryBean.class,
         entityManagerFactoryRef = "catalogEntityManagerFactory",
         transactionManagerRef = "catalogTransactionManager")
+@EnableJpaTrackableFlow(entityClass = JpaRecipe.class, routeKey = CATALOG_ROUTE_KEY,
+        permissionRoots = "PRODUCT", rootPath = "/recipes", projectionName = "Recipe")
 @JpaEntityScan(basePackages = "com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain",
-        routePackage = "com.broadleafcommerce.catalog")
+        routePackage = CATALOG_ROUTE_PACKAGE)
 @AutoConfigureAfter(CatalogJpaAutoConfiguration.class)
-public class TutorialCatalogConfig {
-}
-----
-
-== Define Your Service Layer
-Next, let’s create a `RecipeService` that will facilitate the conversion from business domain and
-repository domain as well as provide any additional business logic.
-This service will be used by our exposed endpoint. First, create an interface called `RecipeService`
-in the following directory: `src/main/java/com/broadleafsamples/tutorials/services/catalog/service`
-
-[source, java]
-----
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.data.tracking.core.service.RsqlCrudEntityService;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
-
-import java.util.Collection;
-
-public interface RecipeService <P extends Recipe> extends RsqlCrudEntityService<P> {
-
-    @NonNull
-    Page<P> readAllByContextIds(@NonNull Collection<String> contextIds,
-                                @Nullable Pageable page,
-                                @Nullable ContextInfo contextInfo);
-
-}
-----
-
-Now, we'll need to define an implementation called `MyRecipeService` that implements
-this interface in the following directory:
-`src/main/java/com/broadleafsamples/tutorials/services/catalog/service`
-
-[source, java]
-----
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
-
-import com.broadleafcommerce.data.tracking.core.Trackable;
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.data.tracking.core.service.BaseRsqlCrudEntityService;
-import com.broadleafcommerce.data.tracking.core.service.RsqlCrudEntityHelper;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
-import com.broadleafsamples.tutorials.services.catalog.repository.RecipeRepository;
-
-import java.util.Collection;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-
-@Service
-public class MyRecipeService<P extends Recipe> extends BaseRsqlCrudEntityService<P>
-        implements RecipeService<P> {
-
-    @Getter(value = AccessLevel.PROTECTED, onMethod_ = {@NonNull})
-    private final RecipeRepository repository;
-
-    public MyRecipeService(RecipeRepository repository,
-                              RsqlCrudEntityHelper helper) {
-        super(repository, helper);
-        this.repository = repository;
-    }
-
-    @Override
-    public Page<P> readAllByContextIds(@NonNull Collection<String> contextIds,
-                                       Pageable page,
-                                       ContextInfo contextInfo) {
-        return repository.findByContextIdIn(contextIds, page, contextInfo)
-                .map(domain -> convertFromPersistentDomain((Trackable) domain, contextInfo));
-    }
-
-}
-----
-
-== Create a `Recipe` Endpoint
-
-Finally, let's tie this all together and create a `Recipe` REST Controller that utilizes
-the `RecipeService` which we just created. Create a `RecipeEndpoint` in the following
-directory: `src/main/java/com/broadleafsamples/tutorials/services/catalog/web/endpoint`
-
-[source, java]
-----
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.broadleafcommerce.catalog.domain.RequestView;
-import com.broadleafcommerce.catalog.domain.product.Product;
-import com.broadleafcommerce.common.extension.data.DataRouteByExample;
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
-import com.broadleafcommerce.data.tracking.core.policy.Policy;
-import com.broadleafcommerce.data.tracking.core.type.OperationType;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
-import com.broadleafsamples.tutorials.services.catalog.service.RecipeService;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import javax.servlet.http.HttpServletRequest;
-
-import cz.jirutka.rsql.parser.ast.Node;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@RestController
-@AllArgsConstructor
-@DataRouteByExample(Product.class)
-public class RecipeEndpoint {
-
-    public static final String RECIPE_SCOPE = "PRODUCT";
-
-    @Getter(AccessLevel.PROTECTED)
-    private final RecipeService<Recipe> recipeService;
-
-    @GetMapping("/recipes")
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Page<Recipe> readAllRecipes(HttpServletRequest request,
-                            @ContextOperation(value = OperationType.READ) ContextInfo context,
-                            @RequestParam(value = "q", required = false) String query,
-                            @PageableDefault(size = 50) Pageable page,
-                            Node filters) {
-        return recipeService.readAll(filters, page, context);
-    }
-
-    @PostMapping(value = "/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe createRecipe(HttpServletRequest request,
-                     @ContextOperation(value = OperationType.CREATE) ContextInfo context,
-                     @RequestBody Recipe req) {
-        return recipeService.create(req, context);
-    }
-
-    @GetMapping("/recipes/{id}")
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe readRecipeById(HttpServletRequest request,
-                       @ContextOperation ContextInfo context,
-                       @PathVariable("id") String id) {
-        return recipeService.readByContextId(id, context);
-    }
-
-    @PatchMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe updateRecipe(HttpServletRequest request,
-                     @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
-                     @PathVariable("id") String id,
-                     @JsonView(RequestView.class) @RequestBody Recipe req) {
-        return recipeService.update(id, req, context);
-    }
-
-    @PutMapping(value = "/recipes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public Recipe replaceRecipe(HttpServletRequest request,
-                      @ContextOperation(value = OperationType.UPDATE) ContextInfo context,
-                      @PathVariable("id") String id,
-                      @JsonView(RequestView.class) @RequestBody Recipe req) {
-        req.setId(id);
-        return recipeService.replace(id, req, context);
-    }
-
-    @DeleteMapping(value = "/recipes/{id}")
-    @Policy(permissionRoots = {RECIPE_SCOPE})
-    public void deleteRecipe(HttpServletRequest request,
-                  @ContextOperation(value = OperationType.DELETE) ContextInfo context,
-                  @PathVariable("id") String id) {
-        recipeService.delete(id, context);
-    }
-
-}
+public class TutorialCatalogConfig {}
 ----
 
 [IMPORTANT]
 ====
+Configuring the annotation `@EnableJpaTrackableFlow` enables and generates a lot of boilerplate
+configuration including a projection domain, a repository class, a service class, and an endpoint
+all with sensible defaults automatically
+
 For the purposes of this tutorial, we'll be utilizing the same security scope
 as `PRODUCT` purely as a way to make the steps in this tutorial easier to follow.
+This is defined with the `permissionRoots` value on `@EnableJpaTrackableFlow` and
+would be analogous to defining a specific `@Policy` annotation to a particular
+method in your endpoint.
+
 In practice, you may wish to create granual permissions scopes specifically
 for your new entities and then make sure the `AUTH` service is aware of those
 new scopes.

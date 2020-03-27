@@ -2,19 +2,13 @@ package com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.modelmapper.Conditions;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 import com.broadleafcommerce.common.jpa.JpaConstants;
 import com.broadleafcommerce.data.tracking.core.CatalogTrackable;
-import com.broadleafcommerce.data.tracking.core.mapping.BusinessTypeAware;
 import com.broadleafcommerce.data.tracking.core.mapping.FilterAndSortAlias;
-import com.broadleafcommerce.data.tracking.core.mapping.ModelMapperMappable;
 import com.broadleafcommerce.data.tracking.jpa.UlidConverter;
 import com.broadleafcommerce.data.tracking.jpa.filtering.TrackingListener;
 import com.broadleafcommerce.data.tracking.jpa.filtering.domain.CatalogJpaTracking;
-import com.broadleafsamples.tutorials.services.catalog.domain.Recipe;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -36,8 +30,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(exclude = "_id")
 @EntityListeners(TrackingListener.class)
-public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTracking>,
-        ModelMapperMappable, BusinessTypeAware {
+public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTracking> {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,30 +55,6 @@ public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTrack
 
     @Column(name = "DESCRIPTION", length = JpaConstants.MEDIUM_TEXT_LENGTH)
     private String description;
-
-    @Override
-    public ModelMapper fromMe() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        mapper.createTypeMap(JpaRecipe.class, Recipe.class)
-                .addMapping(JpaRecipe::getContextId, Recipe::setId);
-        return mapper;
-    }
-
-    @Override
-    public ModelMapper toMe() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        mapper.createTypeMap(Recipe.class, JpaRecipe.class)
-                .addMappings(mapping -> mapping.when(Conditions.isNotNull())
-                        .map(Recipe::getId, JpaRecipe::setContextId));
-        return mapper;
-    }
-
-    @Override
-    public Class<?> getBusinessDomainType() {
-        return Recipe.class;
-    }
 
     @Override
     public Optional<String> getDisplay() {
