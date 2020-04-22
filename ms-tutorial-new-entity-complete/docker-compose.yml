@@ -55,7 +55,7 @@ services:
       BROADLEAF_AUTH_SECURITY_USEREDIRECTURIHOST: 'true'
       DEBUG_PORT: 8000
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/broadleaf?currentSchema=auth'
-    image: repository.broadleafcommerce.com:5001/broadleaf-evaluation/authenticationservice-kafka-configserver:branch-feature-liquibase-micropm1548-latest-snapshot
+    image: repository.broadleafcommerce.com:5001/broadleaf-demo/demo-authenticationservice-kafka-configserver:latest-snapshot
     networks:
       - kafkanet
       - postgresnet
