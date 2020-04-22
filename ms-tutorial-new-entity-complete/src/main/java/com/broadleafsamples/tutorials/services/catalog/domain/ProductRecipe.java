@@ -41,7 +41,7 @@ public class ProductRecipe implements Serializable, ContextStateAware {
     private ContextState contextState;
 
     public void setupRecipe(String id) {
-        this.recipe = ProjectionTypeFactory.get(JpaRecipe.class, id);
+        this.recipe = Projection.get(JpaRecipe.class, id);
     }
 
 }
