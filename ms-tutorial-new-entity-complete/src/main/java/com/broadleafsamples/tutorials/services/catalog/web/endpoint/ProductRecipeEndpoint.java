@@ -27,6 +27,7 @@ import com.broadleafsamples.tutorials.services.catalog.domain.ProductRecipe;
 import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.JpaRecipe;
 import com.broadleafsamples.tutorials.services.catalog.service.MyProductRecipeService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -119,6 +120,9 @@ public class ProductRecipeEndpoint {
 
     private Map<String, Projection<JpaRecipe>> fetchRecipes(List<String> benefitIds,
             ContextInfo contextInfo) {
+        if (benefitIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
         Stream<Projection<JpaRecipe>> recipes =
                 StreamSupport.stream(
                         recipeService.readAllByContextId(benefitIds.stream()::iterator, contextInfo)

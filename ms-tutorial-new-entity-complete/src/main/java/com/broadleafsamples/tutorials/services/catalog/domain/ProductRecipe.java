@@ -1,6 +1,7 @@
 package com.broadleafsamples.tutorials.services.catalog.domain;
 
 import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.common.extension.ProjectionTypeFactory;
 import com.broadleafcommerce.common.extension.RequestView;
 import com.broadleafcommerce.common.extension.ResponseView;
 import com.broadleafcommerce.common.extension.projection.Projection;
@@ -36,7 +37,11 @@ public class ProductRecipe implements Serializable, ContextStateAware {
 
     private Product product;
 
-    @Accessors(chain = false)
+    @Accessors
     private ContextState contextState;
+
+    public void setupRecipe(String id) {
+        this.recipe = ProjectionTypeFactory.get(JpaRecipe.class, id);
+    }
 
 }
