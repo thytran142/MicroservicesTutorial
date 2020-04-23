@@ -33,7 +33,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "MY_PRODUCT_BENEFIT")
+@Table(name = "MY_PRODUCT_RECIPE")
 @Data
 @EqualsAndHashCode(exclude = "_id")
 @EntityListeners(TrackingListener.class)
@@ -77,8 +77,7 @@ public class JpaProductRecipe implements Serializable, CatalogTrackable<CatalogJ
         mapper.createTypeMap(JpaProductRecipe.class, ProductRecipe.class)
                 .addMapping(JpaProductRecipe::getContextId, ProductRecipe::setId)
                 .addMappings(mapping -> mapping.map(JpaProductRecipe::getRecipeContextId,
-                        (productRecipe, value) -> productRecipe.getRecipe()
-                                .setId((String) value)))
+                        (productRecipe, value) -> productRecipe.setupRecipe((String) value)))
                 .addMappings(mapping -> mapping.map(JpaProductRecipe::getProductContextId,
                         (productRecipe, value) -> productRecipe.getProduct()
                                 .setId((String) value)));
