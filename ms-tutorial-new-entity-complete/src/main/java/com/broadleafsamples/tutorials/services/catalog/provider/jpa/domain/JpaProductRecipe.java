@@ -33,7 +33,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "MY_PRODUCT_BENEFIT")
+@Table(name = "MY_PRODUCT_RECIPE")
 @Data
 @EqualsAndHashCode(exclude = "_id")
 @EntityListeners(TrackingListener.class)

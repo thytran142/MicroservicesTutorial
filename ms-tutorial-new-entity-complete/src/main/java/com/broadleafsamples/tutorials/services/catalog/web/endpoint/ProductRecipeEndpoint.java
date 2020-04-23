@@ -118,14 +118,14 @@ public class ProductRecipeEndpoint {
         productRecipeService.delete(productRecipe.getId(), contextInfo);
     }
 
-    private Map<String, Projection<JpaRecipe>> fetchRecipes(List<String> benefitIds,
+    private Map<String, Projection<JpaRecipe>> fetchRecipes(List<String> recipeIds,
             ContextInfo contextInfo) {
-        if (benefitIds.isEmpty()) {
+        if (recipeIds.isEmpty()) {
             return Collections.emptyMap();
         }
         Stream<Projection<JpaRecipe>> recipes =
                 StreamSupport.stream(
-                        recipeService.readAllByContextId(benefitIds.stream()::iterator, contextInfo)
+                        recipeService.readAllByContextId(recipeIds.stream()::iterator, contextInfo)
                                 .spliterator(),
                         false);
 
