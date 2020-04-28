@@ -309,174 +309,18 @@ information logging in your console that was added in Step 4
 the resulting CSV should also contain a new header and column with the appropriate extended field
 
 
-
-== Advanced Extension Patterns
-
-The tutorial steps outlined above represent a typical extension path and following this
-allows the system to generate a lot of boilerplate code for you including:
-
-- an extension class for the product projection domain
-- `fromMe` and `ToMe` method declarations on the repository domain
-- an explicit `getBusinessDomainType` definition on the reposoitory domain
-- an explicit `TypeSupplier` bean that maps the framework class to your extension class
-
-However, even though the system generates these concepts for you,
-there are some extension cases where you may wish to explicity define
-these overrides to handle more exotic scenarios. When you do this,
-the system will back off and use your explicit definition
-
-[IMPORTANT]
-====
-The code contained in the example project `ms-tutorial-extension-complete` does NOT contain
-the advanced configuration 
-====
-
-=== Explicit Product Repository Domain
-
-In some cases, you may wish to explicitly define the `fromMe` `toMe` and `getBusinessDomainType`
-methods. You can do this like below:
-
-[source,java]
-----
-import org.modelmapper.Conditions;
-import org.modelmapper.ModelMapper;
-import com.broadleafcommerce.catalog.provider.jpa.domain.product.JpaProduct;
-import com.broadleafsamples.tutorials.services.catalog.domain.TutorialProduct;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Entity
-@Table(name = "TUTORIAL_PRODUCT") // <1>
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class TutorialJpaProduct extends JpaProduct { // <2>
-
-    private static final long serialVersionUID = 1L;
-
-    @Column(name = "MY_PROPERTY") // <3>
-    private String myProperty;
-
-    @Override
-    public ModelMapper fromMe() { // <4>
-        ModelMapper mapper = super.fromMe();
-        mapper.createTypeMap(TutorialJpaProduct.class, TutorialProduct.class)
-                .addMapping(TutorialJpaProduct::getContextId, TutorialProduct::setId);
-        return mapper;
-    }
-
-    @Override
-    public ModelMapper toMe() { // <5>
-        ModelMapper mapper = super.toMe();
-        mapper.createTypeMap(TutorialProduct.class, TutorialJpaProduct.class)
-                .addMappings(mapping -> mapping.when(Conditions.isNotNull())
-                        .map(TutorialProduct::getId, TutorialJpaProduct::setContextId));
-        return mapper;
-    }
-
-    @Override
-    public Class<?> getBusinessDomainType() {  // <6>
-        return TutorialProduct.class;
-    }
-
-}
-----
-<1> Specify an extended table name to hold your new properties
-<2> Extend `JPAProduct`
-<3> Specify a column for your new property
-<4> Define a `fromMe` method that helps the framework's mapping pipeline translate from repository
-to projection domains
-<5> Define a `toMe` method that helps the framework's mapping pipeline translate from projection to
-repository domains
-<6> define the "business domain" fully qualified classname (i.e. the `TutorialProject` projection class)
-
-[NOTE]
-====
-If there is a single line extension detected, the framework will auto-register the extension with
-the `Type Factory`. This means you do not have to specify a custom `Type Supplier` as you did for
-the projection. So this mean you don't need to explicitly define one in your Spring configuration.
-====
-
-=== Explicit Product Projection Domain
-
-In some cases, you may want to explicitly extend the actual `Product` *projection* domain so that
-we can keep track of a new attributes directly on the "business" object.
-
-==== Overview
-Projections or "business" domains are just DTOs that represents the data structure used at
-the service tier, and beyond. This structure is agnostic to the specifics of the backing data tier
-and is capable of supporting business logic regardless of how the data is eventually persisted
-or retrieved.
-
-The projection is eventually serialized/de-serialized at the API endpoint tier as part of
-the `@RestController` component. Projections should also be extended using standard
-Java OOP extension. The `@RestController` tier can be engaged to deserialize API input into
-the extended structure via a registered
-https://docs.spring.io/spring/docs/3.0.0.RC3/reference/html/ch05s05.html[Spring Converter] instance.
-As long as the repository domain is extended to map the additional properties,
-the rest of the flow is designed to accommodate the more derived type.
-
-==== Extension Example
-We're going to create a simple `String` property on `Product` to demonstrate extending a base
-framework entity.
-
-[source,java]
-----
-import com.broadleafcommerce.catalog.domain.RequestView;
-import com.broadleafcommerce.catalog.domain.ResponseView;
-import com.broadleafcommerce.catalog.domain.product.Product;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data // <1>
-@With
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonView({RequestView.class, ResponseView.class}) // <2>
-public class TutorialProduct extends Product { // <3>
-
-    private String myProperty; // <4>
-
-}
-----
-<1> Utilizing the https://projectlombok.org/[Lombok] library to minimize boilerplate
-<2> Base catalog request & response view interfaces
-<3> Demonstrate extending the framework's `Product` domain class
-<4> Demonstrate adding an additional simple property that needs to be managed
-
-Finally, you'll want to inform the framework of your extension. You can do this by specifying a custom
-`Type Supplier` in your configuration class.
-
-[source,java]
-----
-@Bean
-public TypeSupplier customProductSupplier() {
-    return () -> new TypeSupplier.TypeMapping(Product.class,
-            TutorialProduct.class); // <1>
-}
-----
-<1> *Type Supplier* is a Broadleaf interface of type `com.broadleafcommerce.common.extension.TypeSupplier`
-
-=== Customizing a Service
+== Customizing a Service
 
 In this section, let's walk through customizing the service tier.
 
-==== Overview
+=== Overview
 The service tier is responsible for executing business logic against projections and represents
 the main source of business requirement fulfillment in the microservice. Like other Broadleaf
 components, service components load in a deferred loader and will be ignored if another bean of
 the same type is already registered. This allows for an extended service to be loaded instead of
 the out-of-the-box Broadleaf service. Existing methods may be overridden, or new ones introduced.
 
-==== Extension Example
+=== Extension Example
 Let's add some additional logging to denote how you may want to hook into the execution of certain
 business flows. In this case, let's add some arbitrary logging in the creation flow of a `Product`.
 
@@ -509,7 +353,7 @@ public class TutorialProductService extends DefaultProductService {  // <1>
 <2> Override the `create()` method, add a custom logging message, and call `super()`
 
 [IMPORTANT]
-====
+===
 You must still register your component with Spring either by component scanning or explicitly
 defining the `@Bean` in your own configuration class e.g.
 
@@ -523,11 +367,11 @@ public ProductService<Product> customProductService(
     return new TutorialProductService(productRepository, helper, variantService);
 }
 ----
-====
+===
 
-=== API Endpoints
+== API Endpoints
 
-===== Overview
+=== Overview
 Broadleaf API endpoints are backed by Spring Rest Controllers.
 The rest controller represents the outward facing API for the microservice. Most commonly,
 this component is responsible for little more than de-serializing/serializing JSON input/output
