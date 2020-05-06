@@ -12,8 +12,7 @@ endif::[]
 
 = Customization & Extension Guide
 
-The following guides will help you work with and develop extensions on top of the
-backend APIs and microservices framework provided with Broadleaf.
+In this tutorial, we’ll extend a custom entity from Broadleaf `CatalogServices` library.
 
 [TIP]
 ====
