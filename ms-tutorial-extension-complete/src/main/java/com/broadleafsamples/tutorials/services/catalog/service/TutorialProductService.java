@@ -12,7 +12,7 @@ import lombok.extern.apachecommons.CommonsLog;
 public class TutorialProductService extends DefaultProductService {
 
     public TutorialProductService(ProductRepository repository, RsqlCrudEntityHelper helper,
-                                  VariantServ]]]]ice variantService) {
+                                  VariantService variantService) {
         super(repository, helper, variantService);
     }
 
