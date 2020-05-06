@@ -1,0 +1,9 @@
+=== Overview
+Broadleaf leverages https://spring.io/projects/spring-data[Spring Data] for entity persistence.
+Spring Data supports polymorphism as part of the data interaction, which facilitates standard
+Java OOP extension of out-of-the-box Broadleaf repository domain classes.
+Fields may be added in extensions to support additional business
+requirements. Also, mutator methods can be overridden for additional customization.
+
+Queries through existing Broadleaf repositories should return the more derived repository domain
+as appropriate. As well, creation of entity state should be accurate to the more derived type.

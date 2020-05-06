@@ -20,11 +20,11 @@ endif::[]
 |===
 |Module |Description
 
+A basic project that runs Broadleaf's unified microservices admin with the `Catalog`
+microservice and other necessary supporting services.
+
 |`ms-tutorial-base`
 | Intended to be the initial project structure on which the other tutorials are based
-
-A basic project that shows running Broadleaf's unified microservices admin alongside the `Catalog`
-microservice (in addition to some supporting services)
 
 |`ms-tutorial-extension-complete`
 | A completed tutorial that showcases typical extensions and customizations on top of the base project
@@ -67,7 +67,7 @@ Docker Desktop for both Mac and Windows already includes compose along with othe
 docker apps.
 ====
 
-Once you have docker installed, you will want to authenticate with Broadleaf's docker registry.
+Once you have Docker installed, you will want to authenticate with Broadleaf's Docker registry.
 
 Type the following into your CLI:
 
@@ -94,10 +94,21 @@ Ideally for a developer machine, you will want to allocate something like:
 You'll need to have Maven installed locally as well.
 https://maven.apache.org/download.cgi[Maven 3.5 or later] is recommended.
 
-Once you have maven installed, another step you need to do before you can
+Once you have Maven installed, another step you need to do before you can
 build the project is to configure the authentication. Maven requires it to be specified in a
 file called `settings.xml` that has to be in the `.m2` subdirectory in a user’s home directory.
 
+If you already have Maven locally, then add the following server to your `<servers> list in your `settings.xml`:
+[source,xml]
+----
+<server>
+  <id>broadleaf-microservices</id>
+  <username>username_here</username>
+  <password>password_here</password>
+</server>
+----
+
+If you do not already have an `.m2` subdirectory and a `settings.xml` file within it, then follow these steps:
 1. Create a folder called `.m2` in your home directory
 2. Create a file called `settings.xml` in the `.m2` folder
 3. Copy the following contents to your `~/.m2/settings.xml` making sure to
@@ -126,33 +137,31 @@ https://maven.apache.org/ref/3.6.3/maven-settings/settings.html[here]
 
 == Running the Project
 
-Now that all of the pre-requisites are installed, let's run the project!
-
-1. First, let's build the project using Maven
+1. From the root directory of MicroservicesTutorial, run the following:
 +
 [source,shell script]
 ----
 mvn clean install
 ----
 +
-2. Before you start up all the APIs, you'll need to first start up a few supporting services
-that are required for this example. These services are provided via docker images and can be run
-and started from the command line by navigating to the root of this project and running:
+2. Before you start up all the APIs, you'll need to first start up a few supporting services.
+These are provided via Docker images and started from the command line by navigating to one
+of the sample tutorial directories (`ms-tutorial-base`, `ms-tutorial-extension-complete`,
+or `ms-tutorial-new-entity-complete`) of this project and running:
 +
 [source,shell script]
 ----
 docker-compose up -d
 ----
 +
-3. Next, you will want to start up the core backend commerce APIs by running the following command:
+3. Next, you will want to start up the core backend commerce APIs by running the following command inside teh same tutorial directory:
 +
 [source,shell script]
 ----
 mvn spring-boot:run
 ----
 +
-4. That's it! Once you've verified that the supporting services and backend APIs are running, you can visit
-the administration console from a browser:
+4. Once the Spring Boot application has started, you can visit the administration console from a browser:
 +
 - Admin Console: https://localhost:8446
 * Username: `master@test.com`

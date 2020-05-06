@@ -1,0 +1,26 @@
+
+==== Overview
+
+The following diagram is a high level diagram that depicts the Metadata "Pipeline"
+in which it is responsible for rendering navigation, requesting view metadata,
+requesting user allowed scopes for views, requesting access tokens, rendering the view,
+and finally, requesting CRUD on the domain service.
+
+image::../images/MS_Metadata_Pipeline.png[]
+
+1. the metadata service receives its initial set of metadata from a variety of sources
+(metadata providers)
+
+2. Each Broadleaf Microservice has a provider out-of-box, like catalog and pricing, which provide
+the metadata needed for those services
+
+3. the metadata from these providers is then stored in the metadata service
+
+4. when the client requests metadata for a view from the REST API, the metadata is processed by
+an augmentation layer before being returned to the client
+
+[TIP]
+====
+this augmentation layer is another useful extension point for making modification to the metadata
+before it’s returned to the client
+====
