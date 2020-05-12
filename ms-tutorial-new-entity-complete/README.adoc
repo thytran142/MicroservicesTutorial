@@ -14,27 +14,12 @@ endif::[]
 
 == Project Goal
 
-In this tutorial we’ll create a few custom entities, services, and endpoints on top of the existing
+In this tutorial, we’ll create a few custom entities, services, and endpoints on top of the existing
 Broadleaf `CatalogServices` library.
-
-[NOTE]
-====
-The guides here assume you are building these customizations on a base project that has
-already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
-or `MicroservicesStarter` for details.
-
-Also be aware that this project is set up to only load the `Catalog` microservice
-alongside some additional supporting services. Not all backend commerce APIs
-are needed for the scope of this tutorial.
-====
 
 [TIP]
 ====
-We recommend following along with this guide in the order in which it is presented. Each section
-may build on and reference extensions created in a previous section.
-
-Once you're done,
-you can check your results against the code in this project:
+Once you're done, you can check your customizations against the sample code at:
 `MicroservicesTutorial/ms-tutorial-new-entity-complete`
 ====
 
@@ -140,10 +125,9 @@ public class JpaRecipe implements Serializable, CatalogTrackable<CatalogJpaTrack
 
 [NOTE]
 ====
-Broadleaf provides mechanism’s that allow entities to undergo "Trackable" behavior.
-For example, if we wish the management of our Recipe’s to be catalog discriminatable
-(as well as undergo sandboxing behavior if that library is included),
-then we’ll need to make sure that we implement our classes in the appropriate way.
+Broadleaf provides mechanisms that allow entities to undergo "Trackable" behavior.
+This marks the entity as one that the framework will treat as
+catalog discriminatable and undergo sandboxing behavior, if that library is included in the project.
 
 In this example, let’s assume that Recipe is a "Trackable" entity
 ====
@@ -197,7 +181,7 @@ This is defined with the `permissionRoots` value on `@EnableJpaTrackableFlow` an
 would be analogous to defining a specific `@Policy` annotation to a particular
 method in your endpoint.
 
-In practice, you may wish to create granual permissions scopes specifically
+In practice, you may wish to create more granular permissions scopes specifically
 for your new entities and then make sure the `AUTH` service is aware of those
 new scopes.
 
@@ -207,15 +191,6 @@ new scopes.
 Now that we've got the key components in each of the architectural layers,
 let's go ahead and create a new domain, repository, service, and endpoint
 to manage the relationship between a `Product` and a `Recipe`.
-
-We'll leave creating these components as an exercise for the reader.
-
-[TIP]
-====
-Once you're done,
-you can check your results against the code in this project:
-`MicroservicesTutorial/ms-tutorial-new-entity-complete`
-====
 
 You'll want to create the following:
 
@@ -648,7 +623,7 @@ Create a `TutorialMetadataConfig` class in the following directory:
 `src/main/java/com/broadleafsamples/tutorials/services/metadata/config`
 
 This will not only configure routes to manage our new `Recipe` entity,
-we'll also override some `Product` metadata components in order to
+it will also override some `Product` metadata components in order to
 be able to create a list grid and associate one or more `Recipes` directly to a `Product`
 
 [source,java]
@@ -836,11 +811,8 @@ VALUES ('recipe-menu-id', 'recipe-menu-id', 'Recipes', 'location-food', '/recipe
 
 == Testing Everything Out
 
-Alright, now that we have everything in place, let's go ahead and
-build and run our project and test everything out!
-
 === Build
-First, build the project running Maven:
+In the directory `ms-tutorial-new-entity-complete`, build the project running Maven:
 
 [source,shell script]
 ----
@@ -848,7 +820,7 @@ mvn clean install
 ----
 
 === Run Project
-Next, we'll want to start up all supporting services and finally the project.
+Next, we'll want to start up all supporting services and then run the project.
 
 [source,shell script]
 ----
@@ -860,6 +832,7 @@ docker-compose up -d
 mvn spring-boot:run -Pnosec
 ----
 
+//TODO Change security defaults on project
 [NOTE]
 ====
 In this project, we've added a maven profile called `nosec` which
@@ -880,7 +853,7 @@ Once you have the admin started, you can perform the following example flow:
 3. Create a new `Recipe` e.g. "Chicken Parmesan" and click Save
 4. Create a new `Product` e.g. "12 oz. Tomato Sauce" and click Save
 5. Once you have a new `Product` you should see a list grid on the bottom that
-allows you to associate one or more `Recipes` with a `Product`, pick the one you
+allows you to associate one or more `Recipes` with a `Product`. Select the one you
 created above and click Save
 
 ==== Test using cURL
@@ -896,13 +869,13 @@ curl --insecure -X GET "https://localhost:8447/products?offset=0&forward=true&pa
 curl --insecure -X GET "https://localhost:8447/recipes?offset=0&forward=true&pageSize=50" -H "accept: application/json" -H "X-Context-Request: {\"tenantId\":\"5DF1363059675161A85F576D\",\"catalogId\":\"10\"}"
 ----
 
+//TODO Either pull this into Endpoint code above, or split into new article
 == API Endpoints
 
 === Overview
 Broadleaf API endpoints are backed by Spring Rest Controllers. Primarily, these serve to
 take and deserialize JSON input from external requests as well as serializing and returning
 JSON output from internal services.
-
 
 Out-of-the-box Rest Controllers may be extended
 using standard Java OOP extension. Broadleaf singleton components are annotated to conditionally
@@ -914,5 +887,3 @@ JSON into more derived business domain types upon endpoint entry. Furthermore, c
 JSON output can be achieved with a combination of a `JSONSerializer` implementation and the
 `@JsonComponent` annotation. This provides flexibility to hide unwanted fields, modify
 field name, etc…​
-
-
