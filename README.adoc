@@ -144,12 +144,26 @@ and started from the command line by navigating to the root of this project and 
 docker-compose up -d
 ----
 +
-3. Next, you will want to start up the core backend commerce APIs by running the following command:
+3. Next, you will want to start up the core backend commerce APIs by running the following
+command (instead of the simple `mvn spring-boot:run` command) so that you don’t have to
+worry about getting a valid JWT authentication token every time:
 +
 [source,shell script]
 ----
-mvn spring-boot:run
+mvn spring-boot:run -Pnosec
 ----
++
+[NOTE]
+====
+In this project, we've added a maven profile called `nosec` which
+passes in some particular properties to disable certain api security
+measures. This allows us to easily demonstrate
+some example flows using the Admin and cURL
+
+If you're starting from `ms-tutorial-base` you'll also
+want to add the following bean `AlwaysMutableContextStateBuilder` to your project,
+which is defined in the main Spring Boot Application class `TutorialNewEntityApplication`
+====
 +
 4. That's it! Once you've verified that the supporting services and backend APIs are running, you can visit
 the administration console from a browser:
