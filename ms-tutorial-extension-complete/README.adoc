@@ -97,6 +97,31 @@ public class TutorialJpaProduct extends JpaProduct {
     @Column(name = "MY_PROPERTY")
     private String myProperty;
 
+    /*
+    * ModelMapper will not know that TutorialJpaProduct is a subclass if JpaProduct, so mapping will
+    * not work correctly. We need to override both fromMe and toMe methods to supply that
+    * information.
+    */
+    @Override
+    public ModelMapper fromMe() {
+        ModelMapper mapper = super.fromMe();
+        mapper.getTypeMap(JpaProduct.class, Product.class)
+                .include(TutorialJpaProduct.class, TutorialProduct.class);
+
+        // Since this is a simple property, mapping is not necessary. This is only for
+        // demonstration, showing that getTypeMap should be used instead of createTypeMap.
+        mapper.getTypeMap(TutorialJpaProduct.class, TutorialProduct.class)
+            .addmapping(TutorialJpaProduct::getMyProperty, TutorialProduct::setMyProperty);
+        return mapper;
+    }
+
+    @Override
+    public ModelMapper toMe() {
+        ModelMapper mapper = super.toMe();
+        mapper.getTypeMap(Product.class, JpaProduct.class)
+                .include(TutorialProduct.class, TutorialJpaProduct.class);
+        return mapper;
+    }
 }
 ----
 
