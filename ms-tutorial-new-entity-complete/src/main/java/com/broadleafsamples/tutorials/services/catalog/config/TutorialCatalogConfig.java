@@ -1,7 +1,7 @@
 package com.broadleafsamples.tutorials.services.catalog.config;
 
-import static com.broadleafcommerce.catalog.provider.jpa.Constants.Persistence.CATALOG_ROUTE_KEY;
-import static com.broadleafcommerce.catalog.provider.jpa.Constants.Persistence.CATALOG_ROUTE_PACKAGE;
+import static com.broadleafcommerce.catalog.provider.RouteConstants.Persistence.CATALOG_ROUTE_KEY;
+import static com.broadleafcommerce.catalog.provider.RouteConstants.Persistence.CATALOG_ROUTE_PACKAGE;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

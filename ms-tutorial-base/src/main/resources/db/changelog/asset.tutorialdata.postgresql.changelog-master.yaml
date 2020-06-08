@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-asset
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists asset
+  - include:
+      file: db/changelog/asset.postgresql.changelog-master.xml

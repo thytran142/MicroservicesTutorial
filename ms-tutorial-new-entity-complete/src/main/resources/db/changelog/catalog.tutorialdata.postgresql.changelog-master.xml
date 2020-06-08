@@ -1,0 +1,88 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <include file="db/changelog/catalog.postgresql.changelog-master.xml" />
+    <changeSet author="elbertbautista (generated)" id="1591378205291-1">
+        <createTable tableName="my_product_recipe">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="my_product_recipe_pkey"/>
+            </column>
+            <column name="context_id" type="VARCHAR(255)"/>
+            <column name="product_context_id" type="VARCHAR(255)"/>
+            <column name="recipe_context_id" type="VARCHAR(255)"/>
+            <column defaultValue="N" name="trk_archived" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trk_catalog_context_id" type="VARCHAR(36)"/>
+            <column name="trk_catalog_level" type="BIGINT"/>
+            <column name="trk_catalog_locale" type="VARCHAR(255)"/>
+            <column name="trk_catalog_name" type="VARCHAR(255)"/>
+            <column name="trk_parent_cat_context_id" type="VARCHAR(36)"/>
+            <column name="trk_parent_cat_level" type="BIGINT"/>
+            <column name="trk_parent_cat_locale" type="VARCHAR(255)"/>
+            <column name="trk_parent_cat_name" type="VARCHAR(255)"/>
+            <column name="trk_change_details" type="VARCHAR(10485760)"/>
+            <column name="trk_composite_sort_level" type="numeric(11, 5)"/>
+            <column name="trk_creating_application_id" type="VARCHAR(36)"/>
+            <column name="trk_current_message" type="VARCHAR(255)"/>
+            <column name="trk_field_overrides" type="VARCHAR(10485760)"/>
+            <column name="trk_level" type="INTEGER"/>
+            <column name="trk_max_field_versions" type="VARCHAR(10485760)"/>
+            <column defaultValue="N" name="trk_sandbox_archived" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trk_change_container_id" type="VARCHAR(36)"/>
+            <column name="trk_change_container_name" type="VARCHAR(255)"/>
+            <column name="trk_change_container_route_key" type="VARCHAR(60)"/>
+            <column name="trk_sub_container_name" type="VARCHAR(255)"/>
+            <column name="trk_sandbox_change_type" type="VARCHAR(60)"/>
+            <column name="trk_sandbox_context_id" type="VARCHAR(36)"/>
+            <column name="trk_sandbox_name" type="VARCHAR(255)"/>
+            <column name="trk_sandbox_owner" type="VARCHAR(60)"/>
+            <column name="trk_sandbox_stage" type="VARCHAR(60)"/>
+            <column name="trk_tenant_id" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="elbertbautista (generated)" id="1591378205291-2">
+        <createTable tableName="my_recipe">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="my_recipe_pkey"/>
+            </column>
+            <column name="context_id" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(10485760)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column defaultValue="N" name="trk_archived" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trk_catalog_context_id" type="VARCHAR(36)"/>
+            <column name="trk_catalog_level" type="BIGINT"/>
+            <column name="trk_catalog_locale" type="VARCHAR(255)"/>
+            <column name="trk_catalog_name" type="VARCHAR(255)"/>
+            <column name="trk_parent_cat_context_id" type="VARCHAR(36)"/>
+            <column name="trk_parent_cat_level" type="BIGINT"/>
+            <column name="trk_parent_cat_locale" type="VARCHAR(255)"/>
+            <column name="trk_parent_cat_name" type="VARCHAR(255)"/>
+            <column name="trk_change_details" type="VARCHAR(10485760)"/>
+            <column name="trk_composite_sort_level" type="numeric(11, 5)"/>
+            <column name="trk_creating_application_id" type="VARCHAR(36)"/>
+            <column name="trk_current_message" type="VARCHAR(255)"/>
+            <column name="trk_field_overrides" type="VARCHAR(10485760)"/>
+            <column name="trk_level" type="INTEGER"/>
+            <column name="trk_max_field_versions" type="VARCHAR(10485760)"/>
+            <column defaultValue="N" name="trk_sandbox_archived" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trk_change_container_id" type="VARCHAR(36)"/>
+            <column name="trk_change_container_name" type="VARCHAR(255)"/>
+            <column name="trk_change_container_route_key" type="VARCHAR(60)"/>
+            <column name="trk_sub_container_name" type="VARCHAR(255)"/>
+            <column name="trk_sandbox_change_type" type="VARCHAR(60)"/>
+            <column name="trk_sandbox_context_id" type="VARCHAR(36)"/>
+            <column name="trk_sandbox_name" type="VARCHAR(255)"/>
+            <column name="trk_sandbox_owner" type="VARCHAR(60)"/>
+            <column name="trk_sandbox_stage" type="VARCHAR(60)"/>
+            <column name="trk_tenant_id" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

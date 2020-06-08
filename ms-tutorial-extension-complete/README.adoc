@@ -20,8 +20,8 @@ They are a great way to experience some core fundamentals before diving into mor
 [NOTE]
 ====
 The guides here assume you are building these customizations on a base project that has
-already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
-or `MicroservicesStarter` for details.
+already been set up for you. You can use `MicroservicesTutorial/ms-tutorial-base` as a base
+starting point.
 
 Also be aware that this project is set up to only load the `Catalog` microservice
 alongside some additional supporting services. Not all backend commerce APIs
@@ -115,6 +115,76 @@ public class TutorialCatalogConfig {
 
 }
 ----
+
+=== Adding a Liquibase Changelog
+The project utilizes Liquibase to manage schema changes, so we'll need to add a new changelog for our extension
+and ensure the system is aware of our changes.
+
+We've provided a utility class that will automatically look at the state of your
+current application's changelogs and generate any missing change set for you.
+
+==== Set up your Liquibase Change Log Structure
+
+Create a file called `catalog.tutorialdata.postgresql.changelog-master.xml` in the following
+directory: `src/main/java/resources/db/changelog/`.
+
+The contents of the file should contain this initially:
+
+[source,xml]
+----
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <include file="db/changelog/catalog.postgresql.changelog-master.xml" />
+</databaseChangeLog>
+----
+
+==== Generate Missing Change Sets
+
+To engage the change set generation capabilities, you will first need to create an integration
+test class under `/src/test/java/com/broadleafsamples/tutorials`
+
+Create a `UtilitiesIT` class like below:
+
+[source,java]
+----
+import org.junit.jupiter.api.Nested;
+import org.springframework.test.context.TestPropertySource;
+
+import static com.broadleafcommerce.common.jpa.schema.SchemaCompatibiltyUtility.PostgresUtilityProvider;
+
+/**
+ * Verify that we can start up against RDBMS using the known schema configuration. The
+ * {@code Utility} test class is intended for use by developers to keep JPA entity changes in sync
+ * with the liquibase change logs.
+ */
+public class UtilitiesIT {
+
+    // @formatter:off
+    /**
+     * Execute these utility tests directly from the IDE in order to update the liquibase
+     * change logs for each supported RDBMS platform based on the current JPA entity state. Updated
+     * Liquibase change logs are emitted at src/main/resources/db/changelog.
+     */
+    // @formatter:on
+    public static class AllUtilities {
+
+        @TestPropertySource(properties = {"spring.liquibase.enabled=false", "service.key=catalog",
+                "client.prefix=tutorialdata"})
+        @Nested
+        public class PostgresUtility extends PostgresUtilityProvider {}
+
+    }
+
+}
+----
+
+Once you have this class in place, run this class in your IDE as an integration test.
+
+This should update the file you created earlier:
+`src/main/java/resources/db/changelog/catalog.tutorialdata.postgresql.changelog-master.xml`
+with the missing changes that need to be applied to the DB (e.g. the `TUTORIAL_PRODUCT` table)
 
 == Additional Spring Components
 
@@ -353,7 +423,7 @@ public class TutorialProductService extends DefaultProductService {  // <1>
 <2> Override the `create()` method, add a custom logging message, and call `super()`
 
 [IMPORTANT]
-===
+====
 You must still register your component with Spring either by component scanning or explicitly
 defining the `@Bean` in your own configuration class e.g.
 
@@ -367,7 +437,7 @@ public ProductService<Product> customProductService(
     return new TutorialProductService(productRepository, helper, variantService);
 }
 ----
-===
+====
 
 == API Endpoints
 

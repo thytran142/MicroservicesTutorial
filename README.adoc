@@ -12,16 +12,24 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+++++
+<img src="https://www.broadleafcommerce.com/cmsstatic/grey%20microservices%20logo.png"
+align="right" height="100px"/>
+++++
+
 = Microservice Tutorials
+
+This project contains several sub-projects that walk through various customizations and tutorial
+exercises that may be common in an implementation. Please refer to each sub-module's README for more detail.
 
 == Project Structure
 
-.Project Modules Overview
+.Multi-Maven Project Structure Modules Overview
 |===
 |Module |Description
 
 |`ms-tutorial-base`
-| Intended to be the initial project structure on which the other tutorials are based
+| Intended to be the initial project structure on which the other tutorials in this project are based
 
 A basic project that shows running Broadleaf's unified microservices admin alongside the `Catalog`
 microservice (in addition to some supporting services)
@@ -34,6 +42,13 @@ microservice (in addition to some supporting services)
 on top of Broadleaf's `Catalog` microservice
 
 |===
+
+[TIP]
+====
+The Tutorial projects here only deploy a subset of the Broadleaf Commerce Microservices (and not the full
+suite of commerce services). To evaluate the full suite of commerce
+services, please visit https://github.com/BroadleafCommerce/MicroservicesStarter
+====
 
 == What Do I Need?
 In order to get this reference project running locally, you will want to obtain and install
@@ -124,27 +139,44 @@ https://maven.apache.org/settings.html#Servers[here] and
 https://maven.apache.org/ref/3.6.3/maven-settings/settings.html[here]
 ====
 
-== Running the Project
+== Building & Running the Project
 
 Now that all of the pre-requisites are installed, let's run the project!
 
-1. First, let's build the project using Maven
+=== Building
+
+Now that all of the pre-requisites are installed, let's build and run the projects!
+
+1. First, we'll need to download or clone this project so that we can run
+everything locally on your own machine. You can utilize the `Clone or Download` button at
+the top right of this page.
++
+2. Once you have the project downloaded, let's go ahead and build it using Maven. You're going to
+navigate to the root folder (i.e. the folder that contains the main `pom.xml` file) of where you
+downloaded/un-zipped or cloned the project. In the root of this project run the following to build:
 +
 [source,shell script]
 ----
 mvn clean install
 ----
 +
-2. Before you start up all the APIs, you'll need to first start up a few supporting services
+[NOTE]
+====
+It may take some time during the initial installation as the process needs to download all required
+dependencies. All subsequent builds should go much faster.
+====
+
+=== Running
+1. Before you start up all the APIs, you'll need to first start up a few supporting services
 that are required for this example. These services are provided via docker images and can be run
-and started from the command line by navigating to the root of this project and running:
+and started from the command line by navigating to the root of the appropriate project and running:
 +
 [source,shell script]
 ----
-docker-compose up -d
+docker-compose up -d && ./check-tutorial-services-status.sh
 ----
 +
-3. Next, you will want to start up the core backend commerce APIs by running the following
+2. Next, you will want to start up the core backend commerce APIs by running the following
 command (instead of the simple `mvn spring-boot:run` command) so that you don’t have to
 worry about getting a valid JWT authentication token every time:
 +
@@ -158,20 +190,15 @@ mvn spring-boot:run -Pnosec
 In this project, we've added a maven profile called `nosec` which
 passes in some particular properties to disable certain api security
 measures. This allows us to easily demonstrate
-some example flows using the Admin and cURL (see Step 4)
-
-If you're starting from `ms-tutorial-base` you'll also
-want to add the following bean `AlwaysMutableContextStateBuilder` to your project,
-which is defined in the main Spring Boot Application class `TutorialNewEntityApplication`
+some example flows using the Admin and cURL (see Step 3)
 ====
 +
-4. That's it! Once you've verified that the supporting services and backend APIs are running, you can visit
+3. That's it! Once you've verified that the supporting services and backend APIs are running, you can visit
 the administration console from a browser:
 +
 - Admin Console: https://localhost:8446
 * Username: `master@test.com`
 * Password: `Pass1word!`
-- Commerce Site: https://heatclinic.localhost:8456 or https://aaahotsauces.localhost:8456/
 - cURL Demo:
 +
 [source,shell script]
