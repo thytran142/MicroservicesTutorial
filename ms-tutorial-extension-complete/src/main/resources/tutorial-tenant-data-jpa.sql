@@ -1,15 +1,55 @@
-INSERT INTO BLC_TENANT(ID, TENANT_NAME, IDENTIFIER_TYPE, IDENTIFIER_VALUE, DEFAULT_LOCALE, ALLOWED_LOCALES)
-VALUES ('5DF1363059675161A85F576D', 'Local Tenant', 'DOMAIN', 'localhost', 'en_US',
-        '["en_US"]');
+-- liquibase formatted sql
+-- changeset broadleaf:tenant-tutorial-demo
 
-INSERT INTO BLC_TENANT_APPLICATION (ID, NAME, IDENTIFIER_TYPE, IDENTIFIER_VALUE, CUSTOMER_CONTEXT_ID, DEACTIVATED,
-                                    DEFAULT_LOCALE, ALLOWED_LOCALES, UPDATED_TIMESTAMP, TRK_ARCHIVED, TRK_TENANT_ID)
-VALUES ('1', 'Tutorial Site', 'DOMAIN', 'tutorial.localhost', '1', 'N', 'en_US',
-        '["en_US"]', '2018-01-01', 'N', '5DF1363059675161A85F576D');
+INSERT INTO BLC_TENANT(ID,
+                       TENANT_NAME,
+                       IDENTIFIER_TYPE,
+                       IDENTIFIER_VALUE,
+                       DEFAULT_LOCALE,
+                       ALLOWED_LOCALES,
+                       DEFAULT_CURRENCY,
+                       ALLOWED_CURRENCIES)
+VALUES ('5DF1363059675161A85F576D',
+        'Local Tenant',
+        'DOMAIN',
+        'localhost',
+        'en_US',
+        '["en_US"]',
+        'USD',
+        '["USD"]');
+
+INSERT INTO BLC_TENANT_APPLICATION (ID,
+                                    NAME,
+                                    IDENTIFIER_TYPE,
+                                    IDENTIFIER_VALUE,
+                                    CUSTOMER_CONTEXT_ID,
+                                    DEACTIVATED,
+                                    DEFAULT_LOCALE,
+                                    ALLOWED_LOCALES,
+                                    DEFAULT_CURRENCY,
+                                    ALLOWED_CURRENCIES,
+                                    UPDATED_TIMESTAMP,
+                                    TRK_ARCHIVED,
+                                    TRK_TENANT_ID)
+VALUES ('1', 'Tutorial Site',
+        'DOMAIN',
+        'tutorial.localhost',
+        '1',
+        'N',
+        'en_US',
+        '["en_US"]',
+        'USD',
+        '["USD"]',
+        {d'2018-01-01'},
+        'N',
+        '5DF1363059675161A85F576D');
+
+
 INSERT INTO BLC_TENANT_APPLICATION_CATALOG (APPLICATION_ID, CONTEXT_ID, IMPLICIT, NAME, MUTABILITY_TYPE,
                                             VISIBLE_AS_ASSIGNED, EXCLUDE_FROM_ADD, CATALOG_STATUS,
                                             ISOLATED_CATALOGS_ORDER)
 VALUES ('1', '1', '10', 'TUTORIAL_CATALOG', 'CUSTOMIZABLE', 'Y', 'N', NULL, 0);
+
 INSERT INTO BLC_NOTIFICATION_STATE (ID, CONTAINER, ENTITY_TYPE, CHANGE_TIMESTAMP, CHANGE_TIMESTAMP_ACK, ACKED, STOPPED,
                                     ATTEMPTS, NEXT_ATTEMPT, NOTIFICATION_NAME, MESSAGE_TYPE, MESSAGE_VALUE,
                                     NOTIFICATION_STATES_ORDER)

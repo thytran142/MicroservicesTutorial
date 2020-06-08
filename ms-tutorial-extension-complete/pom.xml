@@ -108,17 +108,17 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>com.broadleafcommerce.microservices</groupId>
-                <artifactId>broadleaf-data-tracking-dependencies</artifactId>
-                <version>${blc.data.tracking.dependencies}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <!-- Broadleaf Framework Services -->
+        <!-- JPA -->
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-jpa-dependencies</artifactId>
+            <version>${blc.jpa.dependencies}</version>
+        </dependency>
+
+        <!-- Admin & Core Services -->
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-admin-navigation-services</artifactId>
@@ -131,6 +131,18 @@
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-sandbox-services</artifactId>
+            <version>${blc.sandbox.services}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-tenant-services</artifactId>
+            <version>${blc.tenant.services}</version>
+        </dependency>
+
+        <!-- Catalog and Asset -->
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-asset-services</artifactId>
             <version>${blc.asset.services}</version>
         </dependency>
@@ -139,6 +151,8 @@
             <artifactId>broadleaf-catalog-services</artifactId>
             <version>${blc.catalog.services}</version>
         </dependency>
+
+        <!-- Metadata -->
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-metadata-services</artifactId>
@@ -146,16 +160,9 @@
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
-            <artifactId>broadleaf-tenant-services</artifactId>
-            <version>${blc.tenant.services}</version>
+            <artifactId>broadleaf-catalog-services-metadata</artifactId>
+            <version>${blc.catalog.metadata}</version>
         </dependency>
-        <dependency>
-            <groupId>com.broadleafcommerce.microservices</groupId>
-            <artifactId>broadleaf-jpa-dependencies</artifactId>
-            <version>${blc.jpa.dependencies}</version>
-        </dependency>
-
-        <!-- Metadata -->
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-asset-services-metadata</artifactId>
@@ -163,8 +170,8 @@
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
-            <artifactId>broadleaf-catalog-services-metadata</artifactId>
-            <version>${blc.catalog.metadata}</version>
+            <artifactId>broadleaf-sandbox-services-metadata</artifactId>
+            <version>${blc.sandbox.metadata}</version>
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
@@ -176,11 +183,6 @@
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-oauth2-resource-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.broadleafcommerce.microservices</groupId>
-            <artifactId>broadleaf-common-extension</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -244,6 +246,21 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- Tests -->
         <dependency>
@@ -264,6 +281,12 @@
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-oauth2-resource-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.13.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-metadata
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists metadata
+  - include:
+      file: db/changelog/metadata.postgresql.changelog-master.xml
