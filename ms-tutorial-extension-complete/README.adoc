@@ -423,7 +423,7 @@ public class TutorialProductService extends DefaultProductService {  // <1>
 <2> Override the `create()` method, add a custom logging message, and call `super()`
 
 [IMPORTANT]
-===
+====
 You must still register your component with Spring either by component scanning or explicitly
 defining the `@Bean` in your own configuration class e.g.
 
@@ -437,7 +437,7 @@ public ProductService<Product> customProductService(
     return new TutorialProductService(productRepository, helper, variantService);
 }
 ----
-===
+====
 
 == API Endpoints
 
