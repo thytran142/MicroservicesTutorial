@@ -20,8 +20,8 @@ Broadleaf `CatalogServices` library.
 [NOTE]
 ====
 The guides here assume you are building these customizations on a base project that has
-already been set up for you. Take a look at `MicroservicesTutorial/ms-tutorial-base`
-or `MicroservicesStarter` for details.
+already been set up for you. You can use `MicroservicesTutorial/ms-tutorial-base` as a base
+starting point.
 
 Also be aware that this project is set up to only load the `Catalog` microservice
 alongside some additional supporting services. Not all backend commerce APIs
@@ -374,6 +374,14 @@ public class ProductRecipeEndpoint {
     }
 }
 ----
+
+== Updating Liquibase with the Latest Schema Changes
+
+Now that we've created a new new entity and extended others, we'll need to create the appropriate
+Liquibase changeset.
+
+Follow the same steps outlined in the previous tutorial `ms-tutorial-extension-complete` README, under
+the section "Adding a Liquibase Changelog".
 
 == Managing `Recipes` and `ProductRecipes` in the Admin with Metadata
 Now that we have all the backend APIs for our new entities created, let's create
