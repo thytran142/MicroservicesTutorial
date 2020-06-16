@@ -1,6 +1,7 @@
 package com.broadleafsamples.tutorials;
 
 import org.junit.jupiter.api.Nested;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static com.broadleafcommerce.common.jpa.schema.SchemaCompatibiltyUtility.PostgresUtilityProvider;
@@ -31,9 +32,15 @@ public class UtilitiesIT {
     // @formatter:on
     public static class AllUtilities {
 
+        /***
+         * Specifically defining the test profile that excludes
+         * all the services other than catalog in order to initiate
+         * the changelog diff generation tool.
+         */
         @TestPropertySource(properties = {"spring.liquibase.enabled=false", "service.key=catalog",
                 "client.prefix=tutorialdata"})
         @Nested
+        @ActiveProfiles("test")
         public class PostgresUtility extends PostgresUtilityProvider {}
 
     }
