@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-admin-navigation
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists adminnavigation
+  - include:
+      file: db/changelog/adminnavigation.postgresql.changelog-master.xml
