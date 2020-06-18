@@ -7,3 +7,5 @@ databaseChangeLog:
             sql: create schema if not exists adminuser
   - include:
       file: db/changelog/adminuser.postgresql.changelog-master.xml
+  - include:
+      file: admin-user-sample-data.sql
