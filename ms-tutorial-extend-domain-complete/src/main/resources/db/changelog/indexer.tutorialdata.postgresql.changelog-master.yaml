@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-indexer
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists indexer
+  - include:
+      file: db/changelog/indexer.postgresql.changelog-master.xml

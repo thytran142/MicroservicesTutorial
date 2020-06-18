@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-search
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists search
+  - include:
+      file: db/changelog/search.postgresql.changelog-master.xml
+  - include:
+      file: search-customer-data-jpa.sql
