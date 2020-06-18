@@ -21,3 +21,4 @@ rebel.xml
 rebel-remote.xml
 *.rebel*
 *.keystore
+*.DS_Store
