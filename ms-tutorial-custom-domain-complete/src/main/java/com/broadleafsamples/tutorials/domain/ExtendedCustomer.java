@@ -1,5 +1,7 @@
 package com.broadleafsamples.tutorials.domain;
 
+import org.modelmapper.ModelMapper;
+
 import com.broadleafcommerce.customer.provider.jpa.domain.JpaCustomer;
 
 import java.util.List;
@@ -22,5 +24,12 @@ public class ExtendedCustomer extends JpaCustomer {
     private String externalSourceId;
 
     @ManyToMany
-    private List<Movie> favoriteMovies;
+    private List<JpaMovie> favoriteJpaMovies;
+
+    @Override
+    public ModelMapper toMe() {
+        ModelMapper modelMapper = super.toMe();
+        modelMapper.createTypeMap(E)
+        return modelMapper;
+    }
 }
