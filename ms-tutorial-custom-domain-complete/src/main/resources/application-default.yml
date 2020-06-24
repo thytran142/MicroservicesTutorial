@@ -8,6 +8,7 @@ broadleaf:
       password: demo
       hikari:
         maximumPoolSize: 2
+      data: 'classpath:/db/menu/tutorial-admin-navigation-data-jpa.sql'
     liquibase:
       change-log: 'classpath:/db/changelog/adminnavigation.tutorialdata.postgresql.changelog-master.yaml'
       liquibase-schema: public
