@@ -18,7 +18,7 @@ import com.broadleafsamples.tutorials.services.customer.provider.jpa.domain.JpaC
 import cz.jirutka.rsql.parser.ast.Node;
 
 @Repository
-@Narrow((JpaNarrowExecutor.class))
+@Narrow(JpaNarrowExecutor.class)
 public interface CustomerMovieRepository
         extends TrackableRepository<JpaCustomerMovie>,
         TrackableRsqlFilterExecutor<JpaCustomerMovie> {
