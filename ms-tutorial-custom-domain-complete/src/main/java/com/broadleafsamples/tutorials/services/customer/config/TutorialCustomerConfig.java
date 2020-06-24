@@ -20,7 +20,7 @@ import static com.broadleafcommerce.customer.provider.RouteConstants.Persistence
 @EnableJpaRepositories(basePackageClasses = CustomerMovieRepository.class,
                     repositoryFactoryBeanClass = JpaTrackableRepositoryFactoryBean.class,
                     entityManagerFactoryRef = "customerEntityManagerFactory",
-                    transactionManagerRef = "catalogTransactionManager")
+                    transactionManagerRef = "customerTransactionManager")
 @EnableJpaTrackableFlow(entityClass = JpaMovie.class, routeKey = CUSTOMER_ROUTE_KEY,
                     permissionRoots = "CUSTOMER", rootPath = "/movies", projectionName = "Movie")
 @JpaEntityScan(basePackages = "com.broadleafsamples.tutorials.services.customer.provider.jpa.domain",
