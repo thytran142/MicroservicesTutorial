@@ -10,6 +10,16 @@
             <column name="id" type="VARCHAR(36)">
                 <constraints primaryKey="true" primaryKeyName="tutorial_customer_pkey"/>
             </column>
+            <column name="trk_change_details" type="VARCHAR(10485760)" />
+            <column name="trk_application_context_id" type="VARCHAR(36)" />
+            <column name="trk_application_default_locale" type="VARCHAR(255)" />
+            <column name="trk_application_name" type="VARCHAR(255)" />
+            <column defaultValue="N" name="trk_archived" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="trk_creating_application_id" type="VARCHAR(36)" />
+            <column name="trk_customer_context_id" type="VARCHAR(36)" />
+            <column name="trk_tenant_id" type="VARCHAR(36)" />
         </createTable>
     </changeSet>
 
@@ -18,37 +28,58 @@
     </changeSet>
 
     <changeSet author="caderea (generated)" id="1592493503231-1">
-        <createTable tableName="tutorial_customer_favorite_movies">
-            <column name="extended_customer_id" type="VARCHAR(36)">
-                <constraints nullable="false"/>
+        <createTable tableName="tutorial_customer_movie">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="tutorial_customer_movie_pkey"/>
             </column>
-            <column name="favorite_movies_id" type="BIGINT">
-                <constraints nullable="false"/>
+            <column name="context_id" type="VARCHAR(255)"/>
+            <column name="customer_context_id" type="VARCHAR(255)"/>
+            <column name="movie_context_id" type="VARCHAR(255)"/>
+            <column name="trk_change_details" type="VARCHAR(10485760)" />
+            <column name="trk_application_context_id" type="VARCHAR(36)" />
+            <column name="trk_application_default_locale" type="VARCHAR(255)" />
+            <column name="trk_application_name" type="VARCHAR(255)" />
+            <column defaultValue="N" name="trk_archived" type="CHAR(1)">
+                <constraints nullable="false" />
             </column>
+            <column name="trk_creating_application_id" type="VARCHAR(36)" />
+            <column name="trk_customer_context_id" type="VARCHAR(36)" />
+            <column name="trk_tenant_id" type="VARCHAR(36)" />
         </createTable>
     </changeSet>
     <changeSet author="caderea (generated)" id="1592493503231-2">
         <createTable tableName="tutorial_movie">
-            <column name="id" type="BIGINT">
+            <column name="id" type="VARCHAR(255)">
                 <constraints primaryKey="true" primaryKeyName="tutorial_movie_pkey"/>
             </column>
+            <column name="context_id" type="VARCHAR(255)"/>
             <column name="title" type="VARCHAR(255)"/>
+            <column name="trk_change_details" type="VARCHAR(10485760)" />
+            <column name="trk_application_context_id" type="VARCHAR(36)" />
+            <column name="trk_application_default_locale" type="VARCHAR(255)" />
+            <column name="trk_application_name" type="VARCHAR(255)" />
+            <column defaultValue="N" name="trk_archived" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="trk_creating_application_id" type="VARCHAR(36)" />
+            <column name="trk_customer_context_id" type="VARCHAR(36)" />
+            <column name="trk_tenant_id" type="VARCHAR(36)" />
         </createTable>
     </changeSet>
     <changeSet author="caderea (generated)" id="1592493503231-3">
-        <createIndex indexName="fkavf5ww133pt660wmhppf3bjj9_idx" tableName="tutorial_customer_favorite_movies">
-            <column name="favorite_movies_id"/>
+        <createIndex indexName="fkavf5ww133pt660wmhppf3bjj9_idx" tableName="tutorial_customer_movie">
+            <column name="movie_context_id"/>
         </createIndex>
     </changeSet>
     <changeSet author="caderea (generated)" id="1592493503231-4">
-        <createIndex indexName="fkh99aydvx44lr1mjd40fs1wan3_idx" tableName="tutorial_customer_favorite_movies">
-            <column name="extended_customer_id"/>
+        <createIndex indexName="fkh99aydvx44lr1mjd40fs1wan3_idx" tableName="tutorial_customer_movie">
+            <column name="customer_context_id"/>
         </createIndex>
     </changeSet>
     <changeSet author="caderea (generated)" id="1592493503231-5">
-        <addForeignKeyConstraint baseColumnNames="favorite_movies_id" baseTableName="tutorial_customer_favorite_movies" constraintName="fkavf5ww133pt660wmhppf3bjj9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_movie" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="movie_context_id" baseTableName="tutorial_customer_movie" constraintName="fkavf5ww133pt660wmhppf3bjj9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_movie" validate="true"/>
     </changeSet>
     <changeSet author="caderea (generated)" id="1592493503231-6">
-        <addForeignKeyConstraint baseColumnNames="extended_customer_id" baseTableName="tutorial_customer_favorite_movies" constraintName="fkh99aydvx44lr1mjd40fs1wan3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_customer" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="customer_context_id" baseTableName="tutorial_customer_movie" constraintName="fkh99aydvx44lr1mjd40fs1wan3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_customer" validate="true"/>
     </changeSet>
 </databaseChangeLog>

@@ -65,7 +65,7 @@ public class JpaCustomerMovie implements Serializable, CustomerContextTrackable<
 
     @Link(JpaMovie.class)
     @FilterAndSortAlias("movie")
-    @Column(name = "MOVIE_COTEXT_ID")
+    @Column(name = "MOVIE_CONTEXT_ID")
     @Convert(converter = UlidConverter.class)
     private String movieContextId;
 
