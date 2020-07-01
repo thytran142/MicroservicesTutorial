@@ -40,7 +40,7 @@ public class MovieFields extends DefaultFieldLibrary {
                             .label("Select Movie")
                             .configureQuery()
                             .configureQueryBuilder()
-                            .column(this.get(title)
+                            .column(this.get(TITLE)
                                     .order(1000)
                                     .build()));
     }
