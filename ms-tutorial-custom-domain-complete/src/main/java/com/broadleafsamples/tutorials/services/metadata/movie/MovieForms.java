@@ -6,14 +6,18 @@ import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MovieForms {
+
+    @Getter(AccessLevel.PROTECTED)
     private final MovieFields movieFields;
 
     protected EntityFormBuilder generalCreateForm() {
-        return generalForm("movieCraeteForm");
+        return generalForm("movieCreateForm");
     }
 
     protected EntityFormBuilder generalEditForm() {

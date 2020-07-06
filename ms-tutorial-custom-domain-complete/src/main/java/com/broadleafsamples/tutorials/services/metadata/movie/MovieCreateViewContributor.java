@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MovieCreateViewContributor implements ComponentContributor {
     public static final String MOVIE_SCOPE = "CUSTOMER";
-    public static final String ID = "customer:movies:list";
+    public static final String ID = "customer:movies:create";
 
     private final MovieForms movieForms;
 
@@ -21,7 +21,7 @@ public class MovieCreateViewContributor implements ComponentContributor {
         return new CreateEntityViewBuilder(ID,
                 MOVIE_SCOPE,
                 "/customer/movies",
-                "Craete Movie")
+                "Create Movie")
                 .sandboxDiscriminated("MOVIE")
                 .catalogDiscriminated()
                 .backLabel("Back")

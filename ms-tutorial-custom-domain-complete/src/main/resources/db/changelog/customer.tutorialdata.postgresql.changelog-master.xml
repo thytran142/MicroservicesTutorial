@@ -66,20 +66,4 @@
             <column name="trk_tenant_id" type="VARCHAR(36)" />
         </createTable>
     </changeSet>
-    <changeSet author="caderea (generated)" id="1592493503231-3">
-        <createIndex indexName="fkavf5ww133pt660wmhppf3bjj9_idx" tableName="tutorial_customer_movie">
-            <column name="movie_context_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="caderea (generated)" id="1592493503231-4">
-        <createIndex indexName="fkh99aydvx44lr1mjd40fs1wan3_idx" tableName="tutorial_customer_movie">
-            <column name="customer_context_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet author="caderea (generated)" id="1592493503231-5">
-        <addForeignKeyConstraint baseColumnNames="movie_context_id" baseTableName="tutorial_customer_movie" constraintName="fkavf5ww133pt660wmhppf3bjj9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_movie" validate="true"/>
-    </changeSet>
-    <changeSet author="caderea (generated)" id="1592493503231-6">
-        <addForeignKeyConstraint baseColumnNames="customer_context_id" baseTableName="tutorial_customer_movie" constraintName="fkh99aydvx44lr1mjd40fs1wan3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tutorial_customer" validate="true"/>
-    </changeSet>
 </databaseChangeLog>

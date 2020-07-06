@@ -102,7 +102,7 @@ public class TutorialMetadataConfig {
 
     public Endpoint.EndpointBuilder createCustomerMovieEndpoint() {
         return Endpoint.builder(EndpointType.CREATE)
-                .uri("/customers/${parent.id}/movies")
+                .uri("/customer/customers/${parent.id}/movies")
                 .method(Endpoint.Method.POST)
                 .operationType(OperationType.CREATE)
                 .scope(MOVIE_SCOPE);
@@ -111,7 +111,7 @@ public class TutorialMetadataConfig {
     public ExternalGridBuilder movies() {
         return new ExternalGridBuilder("Movies",
                 MOVIE_SCOPE,
-                "/customers/${parent.id}/movies")
+                "/customer/customers/${parent.id}/movies")
                 .id("moviesExternalGrid")
                 .sandboxDiscriminated("CUSTOMER_MOVIES")
                 .catalogDiscriminated()
@@ -124,9 +124,9 @@ public class TutorialMetadataConfig {
                 .enableCreate("Add Movie",
                         createCustomerMovieEndpoint().build(),
                         Collections.singletonList(
-                                movieFields().get(MovieFields.TITLE)
+                                movieFields().get(MovieFields.MOVIE)
                                 .order(1000)
                                 .build()))
-                .enableDelete("Remove", "/customers/${parent.id}/movies/${row.id}");
+                .enableDelete("Remove", "/customer/customers/${parent.id}/movies/${row.id}");
     }
 }

@@ -12,14 +12,7 @@ import com.broadleafcommerce.data.tracking.jpa.filtering.domain.CustomerContextJ
 import java.io.Serializable;
 import java.util.Optional;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -50,6 +43,14 @@ public class JpaMovie implements Serializable, CustomerContextTrackable<Customer
 
     @Column(name = "TITLE")
     private String title;
+
+    @Transient
+    private String name;
+
+    @PostLoad
+    public void postLoad() {
+        this.name = this.getTitle();
+    }
 
     @Override
     public Optional<String> getDisplay() {

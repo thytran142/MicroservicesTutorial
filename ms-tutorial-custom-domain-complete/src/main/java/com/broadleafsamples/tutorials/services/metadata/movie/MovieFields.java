@@ -5,8 +5,8 @@ import com.broadleafcommerce.metadata.domain.FieldComponent;
 import com.broadleafcommerce.metadata.domain.builder.field.LookupFieldBuilder;
 
 public class MovieFields extends DefaultFieldLibrary {
-    public static final String MOVIE_SCOPE = "MOVIE";
-    public static final String MOVIE = "MOVIE";
+    public static final String MOVIE_SCOPE = "CUSTOMER";
+    public static final String MOVIE = "movie";
     public static final String TITLE = "title";
 
     public MovieFields() {
@@ -40,7 +40,7 @@ public class MovieFields extends DefaultFieldLibrary {
                             .label("Select Movie")
                             .configureQuery()
                             .configureQueryBuilder()
-                            .column(this.get(TITLE)
+                            .column(this.get(MovieFields.TITLE)
                                     .order(1000)
                                     .build()));
     }

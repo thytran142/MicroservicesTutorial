@@ -71,7 +71,7 @@ public class CustomerMovieEndpoint {
         });
     }
 
-    @PostMapping(value = "/customers/{id}/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/customers/{id}/movies", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {CUSTOMER_SCOPE})
     public CustomerMovie addCustomerMovie(@PathVariable("id") String customerId,
                                           @RequestBody CustomerMovie customerMovie,
