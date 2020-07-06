@@ -90,6 +90,7 @@
         <module>ms-tutorial-base</module>
         <module>ms-tutorial-extension-complete</module>
         <module>ms-tutorial-new-entity-complete</module>
+        <module>ms-tutorial-movie-complete</module>
     </modules>
 
 </project>
