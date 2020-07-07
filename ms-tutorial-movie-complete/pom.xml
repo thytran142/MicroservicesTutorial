@@ -12,7 +12,7 @@
     <artifactId>ms-tutorial-movie-complete</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ms-tutorial-movie-complete</name>
-    <description>New Entity Tutorial for Broadleaf Microservices Tutorials</description>
+    <description>Movie Tutorial for Broadleaf Microservices Tutorials</description>
     <distributionManagement>
         <repository>
             <id>broadleaf-microservices</id>
@@ -146,10 +146,10 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.liquibase</groupId>-->
-<!--            <artifactId>liquibase-core</artifactId>-->
-<!--            <version>3.4.1</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>3.4.1</version>
+        </dependency>
     </dependencies>
 </project>
