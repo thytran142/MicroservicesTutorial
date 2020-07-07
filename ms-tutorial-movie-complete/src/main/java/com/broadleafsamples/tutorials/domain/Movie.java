@@ -11,11 +11,20 @@ public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    @OneToMany(mappedBy = "movie")
+    private Set<Actor> actors;
     public String title;
     private String synopsis;
     private Date releaseDate;
     private String director;
-//    private Set<Actor> actors;
+
+    public Set<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(Set<Actor> actors) {
+        this.actors = actors;
+    }
 
     public long getId() {
         return id;
