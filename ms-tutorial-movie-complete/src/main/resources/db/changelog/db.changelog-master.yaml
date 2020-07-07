@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-movie-tutorial
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists movie_tutorial
+  - include:
+      file: db/changelog/movie.changelog-master.xml
