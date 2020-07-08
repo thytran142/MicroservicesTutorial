@@ -6,4 +6,10 @@ databaseChangeLog:
         - sql:
             sql: create schema if not exists movie_tutorial
   - include:
-      file: db/changelog/movie.changelog-master.xml
+      file: db/changelog/schema.changelog-master.xml
+  - include:
+      file: db/changelog/actors.changelog-master.xml
+  - include:
+      file: db/changelog/movies.changelog-master.xml
+  - include:
+      file: db/changelog/movie-actors.changelog-master.xml
