@@ -28,5 +28,6 @@ public class Actor {
     @JoinTable(name = "movie_actor")
     private List<Movie> movies = new ArrayList<>();
     private String name;
+    private String role;
 
 }

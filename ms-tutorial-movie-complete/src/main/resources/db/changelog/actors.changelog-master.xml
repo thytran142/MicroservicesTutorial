@@ -1,9 +1,151 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="4" author="fwachs">
+    <changeSet id="1" author="fwachs">
         <insert tableName="ACTOR">
             <column name="name" value="Michael J. Fox" />
+            <column name="role" value="Marty McFly" />
         </insert>
     </changeSet>
+
+    <changeSet id="2" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Christopher Lloyd" />
+            <column name="role" value="Dr. Emmett Brown" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="3" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Lea Thompson" />
+            <column name="role" value="	Lorraine Baines" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="4" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Christian Bale" />
+            <column name="role" value="Bruce Wayne" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="5" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Heath Ledger" />
+            <column name="role" value="Joker" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="6" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Aaron Eckhart" />
+            <column name="role" value="Harvey Dent" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="7" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Elijah Wood" />
+            <column name="role" value="Frodo" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="8" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Viggo Mortensen" />
+            <column name="role" value="Aragorn" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="9" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Ian McKellen" />
+            <column name="role" value="Gandalf" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="10" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="John Travolta" />
+            <column name="role" value="Vincent Vega" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="11" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Uma Thurman" />
+            <column name="role" value="Mia Wallace" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="12" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Samuel L. Jackson" />
+            <column name="role" value="Jules Winnfield" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="13" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Brad Pitt" />
+            <column name="role" value="Tyler Durden" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="14" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Edward Norton" />
+            <column name="role" value="The Narrator" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="15" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Meat Loaf" />
+            <column name="role" value="Robert 'Bob' Paulsen" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="16" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Tom Hanks" />
+            <column name="role" value="	Forrest Gump" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="17" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Robin Wright" />
+            <column name="role" value="Jenny Curran" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="18" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Gary Sinise" />
+            <column name="role" value="Lieutenant Dan Taylor" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="19" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Mark Hamill" />
+            <column name="role" value="Luke Skywalker" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="20" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Harrison Ford" />
+            <column name="role" value="Han Solo" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="21" author="fwachs">
+        <insert tableName="ACTOR">
+            <column name="name" value="Carrie Fisher" />
+            <column name="role" value="Princess Leia" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

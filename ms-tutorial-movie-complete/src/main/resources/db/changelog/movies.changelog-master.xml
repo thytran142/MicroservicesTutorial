@@ -1,11 +1,74 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
+    <changeSet id="1" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="Back to the Future" />
+            <column name="synopsis" value="Marty McFly, a 17-year-old high school student, is accidentally sent thirty years into the past in a time-traveling DeLorean invented by his close friend, the eccentric scientist Doc Brown."/>
+            <column name="director" value="Robert Zemeckis" />
+            <column name="release_date" value="1985-07-03" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="2" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="Back to the Future Part II" />
+            <column name="synopsis" value="After visiting 2015, Marty McFly must repeat his visit to 1955 to prevent disastrous changes to 1985...without interfering with his first trip."/>
+            <column name="director" value="Robert Zemeckis" />
+            <column name="release_date" value="1989-11-22" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="3" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="The Dark Knight" />
+            <column name="synopsis" value="When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."/>
+            <column name="director" value="Christopher Nolan" />
+            <column name="release_date" value="2008-07-18" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="4" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="The Lord of the Rings: The Return of the King" />
+            <column name="synopsis" value="Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring."/>
+            <column name="director" value="Peter Jackson" />
+            <column name="release_date" value="2003-12-17" />
+        </insert>
+    </changeSet>
+
     <changeSet id="5" author="fwachs">
         <insert tableName="MOVIE">
-            <column name="title" value="Back to the Future I" />
-            <column name="synopsis" value="In this 1980s sci-fi classic, small-town California teen Marty McFly (Michael J. Fox) is thrown back into the '50s when an experiment by his eccentric scientist friend Doc Brown (Christopher Lloyd) goes awry. Traveling through time in a modified DeLorean car, Marty encounters young versions of his parents (Crispin Glover, Lea Thompson), and must make sure that they fall in love or he'll cease to exist. Even more dauntingly, Marty has to return to his own time and save the life of Doc Brown."/>
+            <column name="title" value="Pulp Fiction" />
+            <column name="synopsis" value="The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption."/>
+            <column name="director" value="Quentin Tarantino" />
+            <column name="release_date" value="1994-10-14" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="6" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="Fight Club" />
+            <column name="synopsis" value="An insomniac office worker and a devil-may-care soapmaker form an underground fight club that evolves into something much, much more."/>
+            <column name="director" value="David Fincher" />
+            <column name="release_date" value="1999-10-15" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="7" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="Forrest Gump" />
+            <column name="synopsis" value="The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate and other historical events unfold through the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood sweetheart."/>
             <column name="director" value="Robert Zemeckis" />
+            <column name="release_date" value="1994-07-06" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="8" author="fwachs">
+        <insert tableName="MOVIE">
+            <column name="title" value="Star Wars: Episode V - The Empire Strikes Back" />
+            <column name="synopsis" value="After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda, while his friends are pursued by Darth Vader and a bounty hunter named Boba Fett all over the galaxy."/>
+            <column name="director" value="Irvin Kershner" />
             <column name="release_date" value="1985-07-03" />
         </insert>
     </changeSet>
