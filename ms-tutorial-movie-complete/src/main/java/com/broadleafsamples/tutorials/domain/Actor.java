@@ -8,7 +8,6 @@ import lombok.With;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -26,7 +25,7 @@ public class Actor {
 
     @ManyToMany
     @JoinTable(name = "movie_actor")
-    private List<Movie> movies = new ArrayList<>();
+    private List<Movie> movies;
     private String name;
     private String role;
 
