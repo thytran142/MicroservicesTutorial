@@ -1,22 +1,28 @@
 package com.broadleafsamples.tutorials.services.catalog.dataexport.converter;
 
-import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withExample;
-
+import com.broadleafcommerce.catalog.dataexport.converter.DimensionsExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ProductExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ToStringConverter;
+import com.broadleafcommerce.catalog.dataexport.converter.WeightExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.support.ConversionUtils;
+import com.broadleafcommerce.catalog.dataexport.specification.ProductExportSpecification;
 import com.broadleafcommerce.catalog.domain.product.Product;
 import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.TutorialJpaProduct;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import lombok.NonNull;
+import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withExample;
 
 public class TutorialProductExportRowConverter extends ProductExportRowConverter {
 
-    public TutorialProductExportRowConverter(@NonNull ToStringConverter<Object> toStringConverter) {
-        super(toStringConverter);
+
+    public TutorialProductExportRowConverter(ProductExportSpecification specification,
+                                             ObjectMapper objectMapper,
+                                             ToStringConverter<Object> toStringConverter,
+                                             DimensionsExportRowConverter dimensionsExportRowConverter,
+                                             WeightExportRowConverter weightExportRowConverter) {
+        super(specification, objectMapper, toStringConverter, dimensionsExportRowConverter, weightExportRowConverter);
     }
 
     @Override
@@ -34,7 +40,7 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
         return result;
     }
 
-    public static class TutorialFields extends Fields {
+    public static class TutorialFields {
         public static final String MY_PROPERTY = "myProperty";
     }
 

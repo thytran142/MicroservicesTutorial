@@ -24,18 +24,14 @@ already been set up for you. You can use `MicroservicesTutorial/ms-tutorial-base
 starting point.
 
 Also be aware that this project is set up to only load the `Catalog` microservice
-alongside some additional supporting services. Not all backend commerce APIs
+alongside some core backing services and additional supporting services. Not all backend commerce APIs
 are needed for the scope of this tutorial.
 ====
 
 [TIP]
 ====
 We recommend following along with this guide in the order in which it is presented. Each section
-may build on and reference extensions created in a previous section. 
-
-Once you're done,
-you can check your results against the code in this project:
-`MicroservicesTutorial/ms-tutorial-extension-complete`
+may build on and reference extensions created in a previous section.
 ====
 
 == Service Anatomy Overview
@@ -199,23 +195,29 @@ the default `Product Export` jobs to utilize the new extended attributes when pr
 
 [source,java]
 ----
-import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withExample;
-
+import com.broadleafcommerce.catalog.dataexport.converter.DimensionsExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ProductExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.ToStringConverter;
+import com.broadleafcommerce.catalog.dataexport.converter.WeightExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.support.ConversionUtils;
+import com.broadleafcommerce.catalog.dataexport.specification.ProductExportSpecification;
 import com.broadleafcommerce.catalog.domain.product.Product;
 import com.broadleafsamples.tutorials.services.catalog.provider.jpa.domain.TutorialJpaProduct;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import lombok.NonNull;
+import static com.broadleafcommerce.common.extension.reflection.InvocationUtils.withExample;
 
 public class TutorialProductExportRowConverter extends ProductExportRowConverter { // <1>
 
-    public TutorialProductExportRowConverter(@NonNull ToStringConverter<Object> toStringConverter) {
-        super(toStringConverter);
+
+    public TutorialProductExportRowConverter(ProductExportSpecification specification,
+                                             ObjectMapper objectMapper,
+                                             ToStringConverter<Object> toStringConverter,
+                                             DimensionsExportRowConverter dimensionsExportRowConverter,
+                                             WeightExportRowConverter weightExportRowConverter) {
+        super(specification, objectMapper, toStringConverter, dimensionsExportRowConverter, weightExportRowConverter);
     }
 
     @Override
@@ -233,7 +235,7 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
         return result;
     }
 
-    public static class TutorialFields extends Fields {
+    public static class TutorialFields {
         public static final String MY_PROPERTY = "myProperty";
     }
 
@@ -254,11 +256,19 @@ defining the `@Bean` in your own configuration class e.g.
 
 [source,java]
 ----
-@Bean
-public TutorialProductExportRowConverter customProductExportRowConverter(
-        ToStringConverter<Object> toStringConverter) {
-    return new TutorialProductExportRowConverter(toStringConverter);
-}
+    @Bean
+    public TutorialProductExportRowConverter customProductExportRowConverter(
+            ProductExportSpecification specification,
+            ObjectMapper objectMapper,
+            ToStringConverter<Object> toStringConverter,
+            DimensionsExportRowConverter dimensionsExportRowConverter,
+            WeightExportRowConverter weightExportRowConverter) {
+        return new TutorialProductExportRowConverter(specification,
+                objectMapper,
+                toStringConverter,
+                dimensionsExportRowConverter,
+                weightExportRowConverter);
+    }
 ----
 ====
 
@@ -322,48 +332,36 @@ import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
 @Configuration
 public class TutorialMetadataConfig {
 
-    @Component
-    class TutorialProductFields extends ProductFields {  // <1>
+    @Configuration
+    public static class Catalog {
 
-        public static final String MY_PROPERTY = "myProperty";
+        @Bean
+        public ComponentSource tutorialProductMetadataOverrides() { // <1>
+            return registry -> {
+                CreateEntityView<?> productCreate =
+                        (CreateEntityView<?>) registry.get(ProductIds.CREATE);
+                productCreate.generalForm(this::addTutorialProductFields);
 
-        public TutorialProductFields() {
-            super();
-            add(FieldComponent.builder(MY_PROPERTY)
-                    .label("My Property")
-                    .required(false)
-                    .translatable(false));
+                UpdateEntityView<?> productUpdate =
+                        (UpdateEntityView<?>) registry.get(ProductIds.UPDATE);
+                productUpdate.generalForm(this::addTutorialProductFields);
+            };
         }
 
-    }
-
-    @Component
-    class TutorialProductForms extends ProductForms {  // <2>
-
-        public TutorialProductForms(ProductFields productFields,
-                ProductOptionFields productOptionFields, VariantFields variantFields,
-                PromotionalProductFields promotionalProductFields,
-                IncludedProductFields includedProductFields, PriceDataFields priceDataFields,
-                CommonPriceDataComponents commonPriceDataComponents, ProductOptionForms optionForms,
-                NonSkuPriceDataComponents nonSkuPriceDataComponents) {
-            super(productFields, productOptionFields, variantFields, promotionalProductFields,
-                    includedProductFields, priceDataFields, commonPriceDataComponents, optionForms,
-                    nonSkuPriceDataComponents);
+        protected EntityFormView<?> addTutorialProductFields(EntityFormView<?> form) { // <2>
+            return form
+                    .addField(TutorialProductProps.MY_PROPERTY, Fields.string()
+                            .label("My Property")
+                            .order(20000));
         }
 
-        @Override
-        protected EntityFormBuilder generalForm() {
-            return super.generalForm()
-                    .addField(getProductFields().get(TutorialProductFields.MY_PROPERTY)
-                            .order(20000).build());
-        }
+
     }
 }
 ----
-<1> Create a new Spring Component to extend the framework's `ProductFields` component.
-Call `super()` and add you new custom field component.
-<2> Create a new Spring Component to extend the framework's `ProductForms` to override
-the `generalForm()` builder. Call `super()` and add your new field to the metadata.
+<1> Create a bean to override existing Catalog Metadata. Utilize the `ComponentSource` registry to get
+the Product `Create` and `Update` Forms to add the custom field.
+<2> Augment the existing `EntityFormView` General Form to add the new `My Property` String field.
 
 == Putting It All Together
 
