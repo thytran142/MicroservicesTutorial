@@ -1,9 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: schema-catalog
-      author: broadleaf
-      changes:
-        - sql:
-            sql: create schema if not exists catalog
-  - include:
-      file: db/changelog/catalog.tutorialdata.postgresql.changelog-master.xml

@@ -80,15 +80,15 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keystore>${project.basedir}/src/main/resources/local.keystore</keystore>
+                            <keystore>${project.basedir}/src/main/resources/local.keystore
+                            </keystore>
+                            <storetype>pkcs12</storetype>
                             <storepass>storepass</storepass>
-                            <keypass>keypass</keypass>
                             <alias>foo_alias</alias>
-                            <dname>cn=localhost, ou=None, L=Dallas,
-                                ST=Texas, o=LocalCom, c=US
+                            <dname>cn=localhost, ou=None, L=Dallas, ST=Texas, o=LocalCom, c=US
                             </dname>
                             <sigalg>SHA256withRSA</sigalg>
-                            <ext></ext>
+                            <ext />
                             <validity>100</validity>
                             <keyalg>RSA</keyalg>
                             <keysize>2048</keysize>
@@ -103,8 +103,8 @@
         <dependencies>
             <dependency>
                 <groupId>com.broadleafcommerce.microservices</groupId>
-                <artifactId>broadleaf-microservices-dependencies</artifactId>
-                <version>${blc.microservices.dependencies}</version>
+                <artifactId>broadleaf-jpa-dependencies</artifactId>
+                <version>${blc.jpa.dependencies}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -133,6 +133,11 @@
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-sandbox-services</artifactId>
             <version>${blc.sandbox.services}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-scheduled-job-services</artifactId>
+            <version>${blc.scheduled.job.services}</version>
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
@@ -178,6 +183,11 @@
             <artifactId>broadleaf-tenant-services-metadata</artifactId>
             <version>${blc.tenant.metadata}</version>
         </dependency>
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-authentication-services-metadata</artifactId>
+            <version>${blc.authentication.metadata}</version>
+        </dependency>
 
         <!-- Misc -->
         <dependency>
@@ -222,12 +232,25 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-jdbc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.zalando</groupId>
+            <artifactId>jackson-datatype-money</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.owasp</groupId>
+            <artifactId>security-logging-logback</artifactId>
+            <version>LATEST</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Non-transitive (optional/provided/runtime) -->

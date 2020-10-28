@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/adminnavigation.postgresql.changelog-master.xml
   - include:
       file: admin-navigation-data-jpa.sql
+  - include:
+      file: db/changelog/sql/add-vendor-services.sql

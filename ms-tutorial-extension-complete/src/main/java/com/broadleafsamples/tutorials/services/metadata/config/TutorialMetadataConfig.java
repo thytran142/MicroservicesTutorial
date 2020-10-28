@@ -1,58 +1,42 @@
 package com.broadleafsamples.tutorials.services.metadata.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-
-import com.broadleafcommerce.catalog.metadata.product.CommonPriceDataComponents;
-import com.broadleafcommerce.catalog.metadata.product.IncludedProductFields;
-import com.broadleafcommerce.catalog.metadata.product.NonSkuPriceDataComponents;
-import com.broadleafcommerce.catalog.metadata.product.ProductFields;
-import com.broadleafcommerce.catalog.metadata.product.ProductForms;
-import com.broadleafcommerce.catalog.metadata.product.ProductOptionFields;
-import com.broadleafcommerce.catalog.metadata.product.ProductOptionForms;
-import com.broadleafcommerce.catalog.metadata.product.PromotionalProductFields;
-import com.broadleafcommerce.catalog.metadata.product.VariantFields;
-import com.broadleafcommerce.catalog.metadata.product.pricing.PriceDataFields;
-import com.broadleafcommerce.metadata.domain.FieldComponent;
-import com.broadleafcommerce.metadata.domain.builder.EntityFormBuilder;
+import com.broadleafcommerce.catalog.metadata.support.ProductIds;
+import com.broadleafcommerce.metadata.dsl.core.extension.views.details.CreateEntityView;
+import com.broadleafcommerce.metadata.dsl.core.extension.views.details.EntityFormView;
+import com.broadleafcommerce.metadata.dsl.core.extension.views.details.UpdateEntityView;
+import com.broadleafcommerce.metadata.dsl.core.utils.Fields;
+import com.broadleafcommerce.metadata.dsl.registry.ComponentSource;
+import com.broadleafsamples.tutorials.services.metadata.support.TutorialProductProps;
 
 @Configuration
 public class TutorialMetadataConfig {
 
-    @Component
-    class TutorialProductFields extends ProductFields {
+    @Configuration
+    public static class Catalog {
 
-        public static final String MY_PROPERTY = "myProperty";
+        @Bean
+        public ComponentSource tutorialProductMetadataOverrides() {
+            return registry -> {
+                CreateEntityView<?> productCreate =
+                        (CreateEntityView<?>) registry.get(ProductIds.CREATE);
+                productCreate.generalForm(this::addTutorialProductFields);
 
-        public TutorialProductFields() {
-            super();
-            add(FieldComponent.builder(MY_PROPERTY)
-                    .label("My Property")
-                    .required(false)
-                    .translatable(false));
+                UpdateEntityView<?> productUpdate =
+                        (UpdateEntityView<?>) registry.get(ProductIds.UPDATE);
+                productUpdate.generalForm(this::addTutorialProductFields);
+            };
         }
+
+        protected EntityFormView<?> addTutorialProductFields(EntityFormView<?> form) {
+            return form
+                    .addField(TutorialProductProps.MY_PROPERTY, Fields.string()
+                            .label("My Property")
+                            .order(20000));
+        }
+
 
     }
-
-    @Component
-    class TutorialProductForms extends ProductForms {
-
-        public TutorialProductForms(ProductFields productFields,
-                ProductOptionFields productOptionFields, VariantFields variantFields,
-                PromotionalProductFields promotionalProductFields,
-                IncludedProductFields includedProductFields, PriceDataFields priceDataFields,
-                CommonPriceDataComponents commonPriceDataComponents, ProductOptionForms optionForms,
-                NonSkuPriceDataComponents nonSkuPriceDataComponents) {
-            super(productFields, productOptionFields, variantFields, promotionalProductFields,
-                    includedProductFields, priceDataFields, commonPriceDataComponents, optionForms,
-                    nonSkuPriceDataComponents);
-        }
-
-        @Override
-        protected EntityFormBuilder generalForm() {
-            return super.generalForm()
-                    .addField(getProductFields().get(TutorialProductFields.MY_PROPERTY)
-                            .order(20000).build());
-        }
-    }
+    
 }
