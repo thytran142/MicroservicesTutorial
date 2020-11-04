@@ -67,7 +67,7 @@ We recommend checking back often to see any new features and tools that will be 
 help provide a seamless customization experience.
 ====
 
-=== Extension Example
+=== `JpaProduct` Extension Example
 We're going to create a simple `String` property on `JpaProduct` to demonstrate extending a base
 framework *repository* domain.
 
@@ -182,12 +182,144 @@ This should update the file you created earlier:
 `src/main/java/resources/db/changelog/catalog.tutorialdata.postgresql.changelog-master.xml`
 with the missing changes that need to be applied to the DB (e.g. the `TUTORIAL_PRODUCT` table)
 
+== Product Projection Domain
+In this section, we’re going to cover how to extend the Product *projection* domain so that
+our new properties can be used by downstream clients and other projection domains.
+
+=== `Product` Extension Example
+As with the `TutorialJpaProduct` extension, We're going to replicate and add the same simple `String` property
+to our `Product` *Projection* domain.
+
+[source,java]
+----
+import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.common.extension.RequestView;
+import com.broadleafcommerce.common.extension.ResponseView;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonView({RequestView.class, ResponseView.class})
+public class TutorialProduct extends Product {
+
+    private String myProperty;
+
+}
+----
+
+Next, you'll want to inform the system of your new projection extension using a `TypeSupplier`.
+You can do this by specifying a custom bean in your configuration:
+
+[source,java]
+----
+public class TutorialCatalogConfig {
+
+    @Bean
+    public TypeSupplier tutorialProductSupplier() {
+        return () -> new TypeSupplier.TypeMapping(Product.class,
+                TutorialProduct.class);
+    }
+
+}
+----
+
+=== `ProductDetails` Extension Example
+
+In some cases, you may also wish to expose your extended repository projection to other dependent projection objects. An example in the `CatalogService` would include the `ProductDetails` projection domain. This domain is used to facilitate building a product structure containing curated information needed for a typical product details page shown in a commerce-facing storefront app (as opposed to info needed to support a product management screen)
+
+To do this, you'll want to extend the base `ProductDetails` domain like below:
+
+[source,java]
+----
+import com.broadleafcommerce.catalog.domain.product.IncludedProduct;
+import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.catalog.domain.product.commerce.ProductDetails;
+import com.broadleafcommerce.catalog.domain.product.option.ProductOption;
+import com.broadleafcommerce.common.extension.ResponseView;
+import com.broadleafsamples.tutorials.services.catalog.domain.product.TutorialProduct;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import lombok.experimental.Delegate;
+
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties({"contextState", "defaultPrice", "msrp", "salePrice"})
+@JsonView({ResponseView.class})
+public class TutorialProductDetails extends ProductDetails {
+
+    private static final long serialVersionUID = 1L;
+
+    @JsonIgnore
+    @Delegate(excludes = ExcludedProductMethods.class)
+    private TutorialProduct product;
+
+    @Override
+    public void setProduct(Product product) {
+        this.product = (TutorialProduct) product;
+        super.setProduct(product);
+    }
+
+    @Override
+    public TutorialProduct getProduct() {
+        return product;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    @AllArgsConstructor
+    private abstract static class ExcludedProductMethods {
+        private List<IncludedProduct> includedProducts;
+
+        private List<ProductOption> options;
+
+        public abstract String getMetaDescription();
+
+        public abstract String getMetaTitle();
+    }
+
+
+}
+----
+
+Next, you'll want to inform the system of your new projection extension using a `TypeSupplier`.
+You can do this by specifying a custom bean in your configuration:
+
+[source,java]
+----
+public class TutorialCatalogConfig {
+
+    @Bean
+    public TypeSupplier tutorialProductDetails() {
+        return () -> new TypeSupplier.TypeMapping(ProductDetails.class,
+                TutorialProductDetails.class);
+    }
+
+}
+----
+
 == Additional Spring Components
 
 In this section, we'll walk through extending other interesting components in the framework which
 would be typical in an actual implementation.
 
-=== Product Export Customization using `withExample()`
+=== Product Export Customization
 We're going to extend framework's `Product` `Export Row Converter` in order to add the simple
 additional property that we've added to the repository domain. This will allow
 the default `Product Export` jobs to utilize the new extended attributes when producing the
@@ -228,10 +360,10 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
     }
 
     @Override
-    public Map<String, String> convert(Product source) { // <3>
+    public Map<String, String> convert(Product source) {
         Map<String, String> result = super.convert(source);
         ConversionUtils.putIfNotNull(TutorialFields.MY_PROPERTY,
-                withExample(TutorialJpaProduct.class).andTarget(source).getMyProperty(), result); // <4>
+                ((TutorialProduct)source).getMyProperty(), result); <4>
         return result;
     }
 
@@ -244,10 +376,20 @@ public class TutorialProductExportRowConverter extends ProductExportRowConverter
 <1> Extend the framework's `ProductExportRowConverter`
 <2> Override the `getHeaders()` method to call `super()` and define your new property
 <3> Override the `convert()` method to call `super()` and define your new property
-<4> Since we've defined a `TutorialJpaProduct` with an extended attribute, and this method passes in
-a "Projection" domain of `Product` (which he have not explicitly extended),
-we can utilize the `withExample` syntax to extrapolate this new property from the base "Product"
-even though we haven't explicitly extended it.
+<4> Cast the `Product` projection to our extended projection to get your new property.
+
+[TIP]
+====
+Broadleaf provides some shortcut extension patterns that allows "auto-generation" of projection domains. In simple cases, it may be enough to just extend the `JpaProduct` repository domain. However, in cases where you need more control of the projection object (or there are other projections that reference it) you may also need to define a `TutorialProduct extends Product` class.
+
+In the simple cases, where Broadleaf builds the projection for you, you can utilize the
+`withExample()` utility method as below:
+
+[source,java]
+----
+ConversionUtils.putIfNotNull(TutorialFields.MY_PROPERTY, withExample(TutorialJpaProduct.class).andTarget(source).getMyProperty(), result);
+----
+====
 
 [IMPORTANT]
 ====
@@ -363,20 +505,6 @@ public class TutorialMetadataConfig {
 the Product `Create` and `Update` Forms to add the custom field.
 <2> Augment the existing `EntityFormView` General Form to add the new `My Property` String field.
 
-== Putting It All Together
-
-Now that we have all the customizations and extensions in place, let's go ahead and re-build
-our application and re-start our backend services.
-
-With the customizations above, we should:
-
-- see our new simple property field on `Product` be manageable in the Admin
-- whenever a new `Product` is created through the admin, you should see some
-information logging in your console that was added in Step 4
-- when you create a new `Product` and create a new `Export` job that references this new product,
-the resulting CSV should also contain a new header and column with the appropriate extended field
-
-
 == Customizing a Service
 
 In this section, let's walk through customizing the service tier.
@@ -453,3 +581,47 @@ JSON into more derived business domain types upon endpoint entry. Furthermore, c
 JSON output can be achieved with a combination of a `JSONSerializer` implementation and the
 `@JsonComponent` annotation. This provides flexibility to hide unwanted fields, modify
 field name, etc…​
+
+
+== Putting It All Together
+
+Now that we have all the customizations and extensions in place, let's go ahead and re-build
+our application and re-start our backend services.
+
+With the customizations above, we should:
+
+- see our new simple property field on `Product` be manageable in the Admin
+- whenever a new `Product` is created through the admin, you should see some
+information logging in your console that was added in Step 4
+- when you create a new `Product` and create a new `Export` job that references this new product,
+the resulting CSV should also contain a new header and column with the appropriate extended field
+
+
+=== Testing Endpoints Directly using cURL [Alternative]
+
+Another alternative evaluation flow or local development flow may include being able to easily hit endpoints directly either via cURL or utilizing a tool like POSTMAN.
+
+==== Get an AUTH Token from the Admin
+
+In order to hit the API directly, you'll need to obtain an `AUTH` token. The broadleaf admin provides an easy utility to generate a token based on the logged in admin user.
+
+If you log into the admin as the master user, you should see a `Developer Settings` at the section bottom of the admin nav. Clicking on this brings up a modal that allows you to turn on certain dev settings.
+
+image::../images/MS_DevSettings.png[]
+
+To generate an `AUTH` token, type in the appropriate scopes needed for your API call (e.g. `PRODUCT`) and click `AUTHORIZE`. Take note of this token for the next step.
+
+[IMPORTANT]
+====
+Note: the token generated defaults to the normal short lived TTL as with all authorization tokens (~2 mins)
+====
+
+==== Hit the Product Details Endpoint
+
+Issue a cURL request like:
+
+[source]
+----
+curl --insecure -X GET "https://localhost:8447/product-details?productUris=%2Ftest" -H "accept: application/json" -H "X-Context-Request: {\"applicationId\": \"1\", \"tenantId\": \"5DF1363059675161A85F576D\" }" -H "Authorization: Bearer <COPY PASTE AUTH TOKEN>"
+----
+

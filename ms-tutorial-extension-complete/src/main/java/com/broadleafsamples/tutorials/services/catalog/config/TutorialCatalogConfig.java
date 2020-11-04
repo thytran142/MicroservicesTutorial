@@ -7,9 +7,14 @@ import com.broadleafcommerce.catalog.dataexport.converter.DimensionsExportRowCon
 import com.broadleafcommerce.catalog.dataexport.converter.ToStringConverter;
 import com.broadleafcommerce.catalog.dataexport.converter.WeightExportRowConverter;
 import com.broadleafcommerce.catalog.dataexport.specification.ProductExportSpecification;
+import com.broadleafcommerce.catalog.domain.product.Product;
+import com.broadleafcommerce.catalog.domain.product.commerce.ProductDetails;
 import com.broadleafcommerce.catalog.provider.jpa.autoconfigure.CatalogJpaAutoConfiguration;
+import com.broadleafcommerce.common.extension.TypeSupplier;
 import com.broadleafcommerce.common.jpa.data.entity.JpaEntityScan;
 import com.broadleafsamples.tutorials.services.catalog.dataexport.converter.TutorialProductExportRowConverter;
+import com.broadleafsamples.tutorials.services.catalog.domain.product.TutorialProduct;
+import com.broadleafsamples.tutorials.services.catalog.domain.product.commerce.TutorialProductDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
@@ -30,6 +35,18 @@ public class TutorialCatalogConfig {
                 toStringConverter,
                 dimensionsExportRowConverter,
                 weightExportRowConverter);
+    }
+
+    @Bean
+    public TypeSupplier tutorialProductDetails() {
+        return () -> new TypeSupplier.TypeMapping(ProductDetails.class,
+                TutorialProductDetails.class);
+    }
+
+    @Bean
+    public TypeSupplier tutorialProductSupplier() {
+        return () -> new TypeSupplier.TypeMapping(Product.class,
+                TutorialProduct.class);
     }
 
 }
