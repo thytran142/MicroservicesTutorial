@@ -51,7 +51,6 @@ services:
     env_file:
       - common-environment.env
     environment:
-      BROADLEAF_AUTH_SECURITY_USEREDIRECTURIHOST: 'true'
       BROADLEAF_AUTH_DATA_LOAD_REGISTERPREDEFINEDOPENAPICLIENT: 'true'
       DEBUG_PORT: 8000
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://database:5432/broadleaf?currentSchema=auth'
