@@ -235,7 +235,7 @@ spring:
       client:
         provider:
           catalog:
-            token-uri: 'https://localhost:8443/auth/oauth/token'
+            token-uri: 'https://localhost:8443/oauth/token'
         registration:
           catalog:
             authorization-grant-type: client_credentials
